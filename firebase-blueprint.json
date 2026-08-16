@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "Car": {
+      "title": "Car",
+      "description": "A vehicle in the garage",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "brand": { "type": "string", "maxLength": 100 },
+        "model": { "type": "string", "maxLength": 100 },
+        "year": { "type": "number" },
+        "carClass": { "type": "string", "enum": ["E", "D", "C", "B", "A", "S1", "S2", "X"] },
+        "pi": { "type": "number" },
+        "power": { "type": "number" },
+        "weight": { "type": "number" },
+        "drivetrain": { "type": "string", "enum": ["FWD", "RWD", "AWD"] },
+        "status": { "type": "string", "maxLength": 50 },
+        "bestLap": { "type": "string", "maxLength": 50 },
+        "isFavorite": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["ownerId", "brand", "model", "year", "carClass", "pi", "power", "weight", "drivetrain", "createdAt", "updatedAt"]
+    },
+    "Build": {
+      "title": "Build",
+      "description": "A specific build/configuration for a car",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "carId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "version": { "type": "string", "maxLength": 50 },
+        "targetClass": { "type": "string", "maxLength": 10 },
+        "targetPI": { "type": "number" },
+        "description": { "type": "string", "maxLength": 1000 },
+        "upgrades": { "type": "object" },
+        "result": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["ownerId", "carId", "version", "createdAt", "updatedAt"]
+    },
+    "Tune": {
+      "title": "Tune",
+      "description": "Operational setup values for a car / build",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "carId": { "type": "string", "maxLength": 128 },
+        "buildId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "track": { "type": "string", "maxLength": 100 },
+        "tires": { "type": "object" },
+        "gearing": { "type": "object" },
+        "alignment": { "type": "object" },
+        "antiRollBars": { "type": "object" },
+        "springs": { "type": "object" },
+        "damping": { "type": "object" },
+        "aero": { "type": "object" },
+        "brake": { "type": "object" },
+        "differential": { "type": "object" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["ownerId", "carId", "name", "createdAt", "updatedAt"]
+    },
+    "Test": {
+      "title": "Test",
+      "description": "An empirical experiment in the Test Lab",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "code": { "type": "string", "maxLength": 20 },
+        "carId": { "type": "string", "maxLength": 128 },
+        "carName": { "type": "string", "maxLength": 100 },
+        "buildId": { "type": "string", "maxLength": 128 },
+        "buildVersion": { "type": "string", "maxLength": 50 },
+        "track": { "type": "string", "maxLength": 100 },
+        "objective": { "type": "string", "maxLength": 500 },
+        "variable": { "type": "string", "maxLength": 100 },
+        "beforeValue": { "type": "string", "maxLength": 100 },
+        "afterValue": { "type": "string", "maxLength": 100 },
+        "result": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["Pending", "Completed", "Discarded"] },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["ownerId", "carId", "carName", "objective", "variable", "status", "createdAt", "updatedAt"]
+    },
+    "Knowledge": {
+      "title": "Knowledge",
+      "description": "Confirmed engineering observation or discovery",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "subject": { "type": "string", "maxLength": 150 },
+        "carName": { "type": "string", "maxLength": 100 },
+        "observation": { "type": "string", "maxLength": 1000 },
+        "evidence": { "type": "string", "maxLength": 500 },
+        "confidence": { "type": "string", "enum": ["High", "Medium", "Experimental"] },
+        "tags": { "type": "array" },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["ownerId", "subject", "observation", "confidence", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/cars/{carId}": {
+      "schema": { "$ref": "#/entities/Car" },
+      "description": "User's cars in the garage"
+    },
+    "/users/{userId}/cars/{carId}/builds/{buildId}": {
+      "schema": { "$ref": "#/entities/Build" },
+      "description": "Build versions for a specific car"
+    },
+    "/users/{userId}/cars/{carId}/tunes/{tuneId}": {
+      "schema": { "$ref": "#/entities/Tune" },
+      "description": "Tune setups for a specific car"
+    },
+    "/users/{userId}/tests/{testId}": {
+      "schema": { "$ref": "#/entities/Test" },
+      "description": "User test lab experiments"
+    },
+    "/users/{userId}/knowledge/{knowledgeId}": {
+      "schema": { "$ref": "#/entities/Knowledge" },
+      "description": "User confirmed knowledge and discoveries"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "FH6 Engineering Cockpit",
+  "description": "High-precision telemetry analysis, build management, operational tuning, test lab, and AI race engineering cockpit for Forza Horizon.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

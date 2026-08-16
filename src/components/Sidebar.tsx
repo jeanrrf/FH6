@@ -19,20 +19,20 @@ export function Sidebar() {
   
   const navItems = [
     { name: 'Cockpit', path: '/', icon: LayoutDashboard },
-    { name: 'Garage', path: '/garage', icon: CarFront },
-    { name: 'Builds', path: '/builds', icon: Wrench },
-    { name: 'Test Lab', path: '/tests', icon: FlaskConical },
-    { name: 'Telemetry', path: '/telemetry', icon: Activity },
-    { name: 'Knowledge', path: '/knowledge', icon: BookOpen },
-    { name: 'AI Engineer', path: '/engineer', icon: Cpu },
-    { name: 'Settings', path: '/settings', icon: SettingsIcon },
+    { name: 'Garagem', path: '/garage', icon: CarFront },
+    { name: 'Builds & Upgrades', path: '/builds', icon: Wrench },
+    { name: 'Laboratório de Testes', path: '/tests', icon: FlaskConical },
+    { name: 'Telemetria', path: '/telemetry', icon: Activity },
+    { name: 'Base de Conhecimento', path: '/knowledge', icon: BookOpen },
+    { name: 'Engenheiro IA', path: '/engineer', icon: Cpu },
+    { name: 'Configurações', path: '/settings', icon: SettingsIcon },
   ];
 
   return (
     <aside className="w-64 border-r border-[#222] flex flex-col bg-[#080808] shrink-0 select-none">
       <div className="p-6 border-b border-[#222] flex items-center justify-between">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-bold">Engineering</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-bold">Engenharia</div>
           <div className="text-xl font-black tracking-tighter leading-none mt-1 italic text-white">
             COCKPIT <span className="text-[#555] font-light text-base">FH6</span>
           </div>
@@ -41,7 +41,7 @@ export function Sidebar() {
       
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="px-3 space-y-1">
-          <div className="text-[9px] uppercase tracking-widest text-[#555] mb-2 px-3 font-mono">Systems</div>
+          <div className="text-[9px] uppercase tracking-widest text-[#555] mb-2 px-3 font-mono">Sistemas</div>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -69,10 +69,10 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-[#222] bg-[#050505]">
         <div className="flex items-center justify-between mb-3 px-2">
-          <span className="text-[9px] uppercase font-mono text-[#555]">Telemetry Status</span>
+          <span className="text-[9px] uppercase font-mono text-[#555]">Status da Telemetria</span>
           <div className="flex items-center space-x-1.5">
             <div className="w-1.5 h-1.5 bg-[#ef4444] rounded-full animate-pulse"></div>
-            <span className="text-[9px] text-[#888] font-mono uppercase">Offline / Ready</span>
+            <span className="text-[9px] text-[#888] font-mono uppercase">Pronto / UDP</span>
           </div>
         </div>
 
@@ -86,13 +86,13 @@ export function Sidebar() {
               )}
             </div>
             <div className="text-[11px] truncate">
-              <p className="text-white font-semibold truncate leading-tight">{user?.displayName || 'Race Engineer'}</p>
+              <p className="text-white font-semibold truncate leading-tight">{user?.displayName || 'Engenheiro de Pista'}</p>
               <p className="text-[#666] font-mono text-[9px] truncate leading-tight">{user?.email}</p>
             </div>
           </div>
           <button 
             onClick={logOut} 
-            title="Sign Out"
+            title="Encerrar Sessão"
             className="p-1.5 text-[#555] hover:text-[#ef4444] transition-colors rounded hover:bg-[#181818]"
           >
             <LogOut className="w-3.5 h-3.5" />

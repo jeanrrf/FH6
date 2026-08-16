@@ -23,10 +23,10 @@ export function Settings() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#888] font-bold mb-1">
-              Cockpit Configuration & Network Engine
+              Configuração do Cockpit e Conexão de Rede
             </div>
             <h1 className="text-3xl sm:text-4xl font-black italic tracking-tighter text-white uppercase">
-              System Settings
+              Configurações do Sistema
             </h1>
           </div>
         </div>
@@ -38,16 +38,16 @@ export function Settings() {
           {/* User Account / Cloud Firestore Status */}
           <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
             <h3 className="text-xs uppercase font-bold tracking-widest text-[#ef4444] pb-2 border-b border-[#1c1c1c] flex items-center gap-2">
-              <Shield className="w-4 h-4" /> Cloud Account & Persistence
+              <Shield className="w-4 h-4" /> Conta Cloud & Persistência
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="p-3 bg-[#080808] border border-[#1a1a1a]">
-                <span className="text-[10px] text-[#666] uppercase block">Authenticated User UID</span>
-                <span className="text-white font-bold truncate block">{user?.uid || 'Anonymous'}</span>
+                <span className="text-[10px] text-[#666] uppercase block">UID do Usuário Autenticado</span>
+                <span className="text-white font-bold truncate block">{user?.uid || 'Anônimo'}</span>
               </div>
               <div className="p-3 bg-[#080808] border border-[#1a1a1a]">
-                <span className="text-[10px] text-[#666] uppercase block">Storage Protocol</span>
+                <span className="text-[10px] text-[#666] uppercase block">Protocolo de Armazenamento</span>
                 <span className="text-[#10b981] font-bold">Cloud Firestore Live Sync</span>
               </div>
             </div>
@@ -62,7 +62,7 @@ export function Settings() {
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">UDP Listening Port</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Porta de Escuta UDP</label>
                   <input
                     type="text"
                     value={udpPort}
@@ -71,7 +71,7 @@ export function Settings() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Protocol Format</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Formato do Protocolo</label>
                   <input
                     type="text"
                     disabled
@@ -82,11 +82,11 @@ export function Settings() {
               </div>
 
               <div className="p-4 bg-[#080808] border border-[#1a1a1a] text-[11px] text-[#777] leading-relaxed">
-                <span className="text-white font-bold block mb-1">How to connect Forza Horizon:</span>
-                1. Open Forza Horizon &gt; Settings &gt; HUD and Gameplay.<br />
-                2. Set <span className="text-white">Data Out</span> to <span className="text-[#10b981]">ON</span>.<br />
-                3. Set <span className="text-white">Data Out IP Address</span> to <span className="text-white">127.0.0.1</span> (or your local network IP).<br />
-                4. Set <span className="text-white">Data Out IP Port</span> to <span className="text-white">{udpPort}</span>.
+                <span className="text-white font-bold block mb-1">Como conectar o Forza Horizon:</span>
+                1. Abra o Forza Horizon &gt; Configurações &gt; HUD e Jogabilidade.<br />
+                2. Defina <span className="text-white">Data Out</span> para <span className="text-[#10b981]">LIGADO</span>.<br />
+                3. Defina o <span className="text-white">Endereço IP do Data Out</span> para <span className="text-white">127.0.0.1</span> (ou o IP da sua rede local).<br />
+                4. Defina a <span className="text-white">Porta IP do Data Out</span> para <span className="text-white">{udpPort}</span>.
               </div>
             </div>
           </div>
@@ -94,36 +94,36 @@ export function Settings() {
           {/* Unit Preferences */}
           <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
             <h3 className="text-xs uppercase font-bold tracking-widest text-[#eab308] pb-2 border-b border-[#1c1c1c] flex items-center gap-2">
-              <Database className="w-4 h-4" /> Units & Measurements
+              <Database className="w-4 h-4" /> Unidades & Medidas
             </h3>
 
             <div className="grid grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Power</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Potência</label>
                 <select
                   value={unitPower}
                   onChange={e => setUnitPower(e.target.value as any)}
                   className="w-full bg-[#161616] border border-[#262626] p-2 text-white"
                 >
-                  <option value="HP">HP (Horsepower)</option>
-                  <option value="kW">kW (Kilowatts)</option>
+                  <option value="HP">HP (Cavalos-vapor)</option>
+                  <option value="kW">kW (Quilowatts)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Weight</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Peso</label>
                 <select
                   value={unitWeight}
                   onChange={e => setUnitWeight(e.target.value as any)}
                   className="w-full bg-[#161616] border border-[#262626] p-2 text-white"
                 >
-                  <option value="KG">KG (Kilograms)</option>
-                  <option value="LBS">LBS (Pounds)</option>
+                  <option value="KG">KG (Quilogramas)</option>
+                  <option value="LBS">LBS (Libras)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Tire Pressure</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Pressão dos Pneus</label>
                 <select
                   value={unitPressure}
                   onChange={e => setUnitPressure(e.target.value as any)}
@@ -143,7 +143,7 @@ export function Settings() {
               className="px-6 py-3 bg-[#ef4444] hover:bg-white text-black text-xs font-black uppercase tracking-wider inline-flex items-center gap-2 transition-colors"
             >
               {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-              {saved ? 'Settings Saved' : 'Save Preferences'}
+              {saved ? 'Configurações Salvas' : 'Salvar Preferências'}
             </button>
           </div>
         </form>

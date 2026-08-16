@@ -95,9 +95,9 @@ export function CarDetail() {
   if (!car) {
     return (
       <div className="flex flex-col h-full bg-[#0a0a0a] items-center justify-center p-8 text-center font-mono">
-        <p className="text-white text-base mb-4 uppercase">Vehicle not found in garage.</p>
+        <p className="text-white text-base mb-4 uppercase">Veículo não encontrado na garagem.</p>
         <Link to="/garage" className="px-4 py-2 bg-[#ef4444] text-black font-bold uppercase text-xs">
-          Return to Garage
+          Voltar para a Garagem
         </Link>
       </div>
     );
@@ -113,12 +113,12 @@ export function CarDetail() {
               to="/garage"
               className="text-[#777] hover:text-white text-xs font-mono font-bold uppercase tracking-wider inline-flex items-center gap-1.5"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Garage
+              <ArrowLeft className="w-3.5 h-3.5" /> Voltar para a Garagem
             </Link>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono uppercase text-[#666]">Status:</span>
               <span className="text-[10px] font-mono uppercase text-[#10b981] bg-[#10b981]/10 px-2 py-0.5 border border-[#10b981]/20 font-bold">
-                {car.status || 'Active Setup'}
+                {car.status || 'Setup Ativo'}
               </span>
             </div>
           </div>
@@ -144,17 +144,17 @@ export function CarDetail() {
             {/* Quick spec strip */}
             <div className="flex items-center gap-4 bg-[#0e0e0e] border border-[#222] px-4 py-2 text-xs font-mono">
               <div>
-                <span className="text-[#555] block text-[9px] uppercase">Power</span>
+                <span className="text-[#555] block text-[9px] uppercase">Potência</span>
                 <span className="font-bold text-white">{car.power} HP</span>
               </div>
               <div className="w-px h-6 bg-[#222]"></div>
               <div>
-                <span className="text-[#555] block text-[9px] uppercase">Weight</span>
+                <span className="text-[#555] block text-[9px] uppercase">Peso</span>
                 <span className="font-bold text-white">{car.weight} KG</span>
               </div>
               <div className="w-px h-6 bg-[#222]"></div>
               <div>
-                <span className="text-[#555] block text-[9px] uppercase">Ratio</span>
+                <span className="text-[#555] block text-[9px] uppercase">Relação P/P</span>
                 <span className="font-bold text-[#10b981]">{(car.power / (car.weight / 1000)).toFixed(1)} HP/T</span>
               </div>
             </div>
@@ -166,13 +166,13 @@ export function CarDetail() {
       <div className="border-b border-[#222] bg-[#0c0c0c] sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 flex space-x-1 overflow-x-auto">
           {[
-            { id: 'overview', label: 'Overview', icon: Info },
+            { id: 'overview', label: 'Visão Geral', icon: Info },
             { id: 'upgrades', label: 'Upgrades', icon: Wrench },
             { id: 'builds', label: 'Builds', icon: Sliders },
-            { id: 'tuning', label: 'Tuning Setup', icon: FileCog },
-            { id: 'tests', label: `Test Lab (${tests.length})`, icon: FlaskConical },
-            { id: 'telemetry', label: 'Telemetry', icon: Activity },
-            { id: 'engineer', label: 'AI Engineer', icon: Cpu },
+            { id: 'tuning', label: 'Setup de Tuning', icon: FileCog },
+            { id: 'tests', label: `Lab de Testes (${tests.length})`, icon: FlaskConical },
+            { id: 'telemetry', label: 'Telemetria', icon: Activity },
+            { id: 'engineer', label: 'Engenheiro IA', icon: Cpu },
           ].map(tab => (
             <button
               key={tab.id}
@@ -252,40 +252,40 @@ function OverviewTab({
         {/* Specs Blueprint */}
         <div className="md:col-span-2 bg-[#0e0e0e] border border-[#222] p-6">
           <h3 className="text-xs uppercase font-mono font-bold tracking-widest text-[#ef4444] mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#ef4444]"></span> Vehicle Mechanical Profile
+            <span className="w-1.5 h-1.5 bg-[#ef4444]"></span> Perfil Mecânico do Veículo
           </h3>
           
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-[#080808] border border-[#1a1a1a] mb-6">
             <div>
-              <span className="text-[9px] uppercase font-mono text-[#555] block">Performance Index</span>
+              <span className="text-[9px] uppercase font-mono text-[#555] block">Índice de Performance</span>
               <span className="text-xl font-black text-white font-mono">{car.carClass} {car.pi}</span>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-mono text-[#555] block">Drivetrain</span>
+              <span className="text-[9px] uppercase font-mono text-[#555] block">Tração (Drivetrain)</span>
               <span className="text-xl font-black text-white font-mono">{car.drivetrain}</span>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-mono text-[#555] block">Engine Power</span>
+              <span className="text-[9px] uppercase font-mono text-[#555] block">Potência do Motor</span>
               <span className="text-xl font-black text-white font-mono">{car.power} HP</span>
             </div>
             <div>
-              <span className="text-[9px] uppercase font-mono text-[#555] block">Curb Weight</span>
+              <span className="text-[9px] uppercase font-mono text-[#555] block">Peso do Veículo</span>
               <span className="text-xl font-black text-white font-mono">{car.weight} KG</span>
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b border-[#181818] text-xs font-mono">
-              <span className="text-[#666]">Target Category</span>
-              <span className="text-white font-bold">{car.carClass} Circuit & Road Master</span>
+              <span className="text-[#666]">Categoria Alvo</span>
+              <span className="text-white font-bold">{car.carClass} Circuito & Asfalto</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-[#181818] text-xs font-mono">
-              <span className="text-[#666]">Calculated Power-to-Weight</span>
+              <span className="text-[#666]">Relação Peso/Potência Calculada</span>
               <span className="text-[#10b981] font-bold">{(car.power / (car.weight / 1000)).toFixed(2)} HP/Ton</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-[#181818] text-xs font-mono">
-              <span className="text-[#666]">Engineering Notes</span>
-              <span className="text-[#aaa] italic">{car.notes || 'No specific setup notes logged yet.'}</span>
+              <span className="text-[#666]">Notas de Engenharia</span>
+              <span className="text-[#aaa] italic">{car.notes || 'Nenhuma nota registrada para este carro.'}</span>
             </div>
           </div>
         </div>
@@ -294,42 +294,42 @@ function OverviewTab({
         <div className="bg-[#0e0e0e] border border-[#222] p-6 flex flex-col justify-between space-y-4">
           <div>
             <h3 className="text-xs uppercase font-mono font-bold tracking-widest text-white mb-4">
-              Setup Shortcuts
+              Atalhos de Setup
             </h3>
             <div className="space-y-2">
               <button
                 onClick={() => onSelectTab('tuning')}
                 className="w-full p-3 bg-[#141414] hover:bg-[#1a1a1a] border border-[#252525] text-left text-xs font-mono text-white flex items-center justify-between transition-colors"
               >
-                <span>Operational Tuning Setup</span>
+                <span>Setup Operacional de Tuning</span>
                 <span className="text-[10px] text-[#ef4444] font-bold">{tunes.length} Presets →</span>
               </button>
               <button
                 onClick={() => onSelectTab('builds')}
                 className="w-full p-3 bg-[#141414] hover:bg-[#1a1a1a] border border-[#252525] text-left text-xs font-mono text-white flex items-center justify-between transition-colors"
               >
-                <span>Build Configurations</span>
+                <span>Configurações de Build</span>
                 <span className="text-[10px] text-[#ef4444] font-bold">{builds.length} Builds →</span>
               </button>
               <button
                 onClick={() => onSelectTab('tests')}
                 className="w-full p-3 bg-[#141414] hover:bg-[#1a1a1a] border border-[#252525] text-left text-xs font-mono text-white flex items-center justify-between transition-colors"
               >
-                <span>Test Lab Experiments</span>
-                <span className="text-[10px] text-[#3b82f6] font-bold">{tests.length} Logged →</span>
+                <span>Experimentos do Lab de Testes</span>
+                <span className="text-[10px] text-[#3b82f6] font-bold">{tests.length} Registrados →</span>
               </button>
               <button
                 onClick={() => onSelectTab('engineer')}
                 className="w-full p-3 bg-[#141414] hover:bg-[#1a1a1a] border border-[#252525] text-left text-xs font-mono text-white flex items-center justify-between transition-colors"
               >
-                <span>Ask AI Engineer</span>
-                <span className="text-[10px] text-[#10b981] font-bold">Live AI →</span>
+                <span>Consultar Engenheiro IA</span>
+                <span className="text-[10px] text-[#10b981] font-bold">IA em Tempo Real →</span>
               </button>
             </div>
           </div>
 
           <div className="p-3 bg-[#080808] border border-[#1a1a1a] text-[10px] font-mono text-[#666]">
-            All configuration changes and tests are automatically synchronized to your private cloud storage.
+            Todas as alterações de configuração e testes são sincronizadas automaticamente na sua nuvem privada.
           </div>
         </div>
       </div>
@@ -343,23 +343,23 @@ function OverviewTab({
 function UpgradesTab({ car, user }: { car: Car; user: any }) {
   const UPGRADE_GROUPS = [
     {
-      category: 'Engine & Power Conversions',
+      category: 'Conversões & Motor',
       items: ['Race Intake', 'Race Fuel System', 'Race Ignition', 'Race Exhaust', 'Race Camshaft & Valves', 'Race Valves', 'Displacement Increase', 'Race Pistons & Compression', 'Single / Twin Turbo', 'Race Intercooler', 'Race Oil & Cooling', 'Race Flywheel']
     },
     {
-      category: 'Platform & Handling',
+      category: 'Plataforma & Manuseio (Handling)',
       items: ['Race Brakes', 'Race Springs & Dampers', 'Race Anti-Roll Bars (Front)', 'Race Anti-Roll Bars (Rear)', 'Race Chassis Reinforcement & Roll Cage', 'Race Weight Reduction']
     },
     {
-      category: 'Drivetrain Conversions',
+      category: 'Transmissão & Drivetrain',
       items: ['Race Clutch', 'Race Transmission (6-Speed / 7-Speed)', 'Race Driveline', 'Race Differential (1.5-Way / 2-Way)']
     },
     {
-      category: 'Tires & Rims',
-      items: ['Slick / Semi-Slick Tire Compound', 'Maximum Front Tire Width', 'Maximum Rear Tire Width', 'Lightweight Forged Rims', 'Max Front Track Width', 'Max Rear Track Width']
+      category: 'Pneus & Rodas',
+      items: ['Composto Slick / Semi-Slick', 'Largura Máxima Dianteira', 'Largura Máxima Traseira', 'Rodas Forjadas Leves', 'Largura de Bitola Dianteira Máxima', 'Largura de Bitola Traseira Máxima']
     },
     {
-      category: 'Aero & Appearance',
+      category: 'Aerodinâmica & Visual',
       items: ['Forza Adjustable Front Splitter', 'Forza Adjustable Rear Wing', 'Rear Diffuser']
     }
   ];
@@ -370,10 +370,10 @@ function UpgradesTab({ car, user }: { car: Car; user: any }) {
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1c1c1c]">
           <div>
             <h3 className="text-xs uppercase font-mono font-bold tracking-widest text-[#ef4444]">
-              Installed Component Upgrades
+              Upgrades de Componentes Instalados
             </h3>
             <p className="text-xs text-[#666] font-mono mt-0.5">
-              Review parts affecting PI {car.pi} and handling dynamics.
+              Revise as peças que afetam o PI {car.pi} e a dinâmica de pilotagem.
             </p>
           </div>
         </div>
@@ -388,7 +388,7 @@ function UpgradesTab({ car, user }: { car: Car; user: any }) {
                 {group.items.map((item, i) => (
                   <div key={i} className="flex items-center justify-between text-xs font-mono py-1 px-2 hover:bg-[#121212] rounded">
                     <span className="text-[#aaa]">{item}</span>
-                    <span className="text-[10px] text-[#10b981] font-bold uppercase">Installed</span>
+                    <span className="text-[10px] text-[#10b981] font-bold uppercase">Instalado</span>
                   </div>
                 ))}
               </div>
@@ -419,7 +419,7 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
       description,
       targetClass,
       targetPI,
-      result: result || 'Baseline configuration logged.'
+      result: result || 'Configuração de baseline registrada.'
     });
     setVersion(`v${(builds.length + 1).toFixed(1)}`);
     setDescription('');
@@ -429,7 +429,7 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
 
   const handleDelete = async (buildId: string) => {
     if (!user || !car.id) return;
-    if (window.confirm("Delete this build version?")) {
+    if (window.confirm("Excluir esta versão de build?")) {
       await deleteBuild(user.uid, car.id, buildId);
     }
   };
@@ -440,28 +440,28 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
         <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#1c1c1c]">
           <div>
             <h3 className="text-xs uppercase font-mono font-bold tracking-widest text-[#ef4444]">
-              Build Configuration History
+              Histórico de Versões de Build
             </h3>
             <p className="text-xs text-[#666] font-mono mt-0.5">
-              Record iterative modifications, parts swaps, and PI milestones for {car.brand} {car.model}.
+              Registre modificações iterativas, troca de peças e metas de PI para {car.brand} {car.model}.
             </p>
           </div>
           <button
             onClick={() => setShowModal(true)}
             className="px-4 py-2 bg-[#ef4444] text-black hover:bg-white text-xs font-mono font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
           >
-            <Plus className="w-3.5 h-3.5" /> Log New Build
+            <Plus className="w-3.5 h-3.5" /> Registrar Nova Build
           </button>
         </div>
 
         {builds.length === 0 ? (
           <div className="py-12 text-center border border-dashed border-[#222] bg-[#080808]">
-            <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NO BUILDS LOGGED FOR THIS CAR</p>
+            <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NENHUMA BUILD REGISTRADA PARA ESTE CARRO</p>
             <button
               onClick={() => setShowModal(true)}
               className="text-xs text-[#ef4444] font-mono uppercase font-bold hover:underline"
             >
-              + Create Baseline Build (v1.0)
+              + Criar Build Baseline (v1.0)
             </button>
           </div>
         ) : (
@@ -474,13 +474,13 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
                       {build.version}
                     </span>
                     <span className="text-xs font-bold text-white font-mono uppercase">
-                      {build.targetClass || car.carClass} {build.targetPI || car.pi} Target
+                      Meta: {build.targetClass || car.carClass} {build.targetPI || car.pi}
                     </span>
                   </div>
                   <p className="text-xs text-[#ccc] font-mono">{build.description}</p>
                   {build.result && (
                     <div className="text-[11px] text-[#10b981] font-mono">
-                      Result: <span className="text-[#e5e5e5]">{build.result}</span>
+                      Resultado: <span className="text-[#e5e5e5]">{build.result}</span>
                     </div>
                   )}
                 </div>
@@ -488,7 +488,7 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
                   <button
                     onClick={() => handleDelete(build.id!)}
                     className="p-2 text-[#555] hover:text-[#ef4444] transition-colors"
-                    title="Delete Build"
+                    title="Excluir Build"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -502,11 +502,11 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-[#0e0e0e] border border-[#333] w-full max-w-lg p-6 font-mono">
-            <h3 className="text-lg font-black text-white uppercase italic mb-4">Log New Build Version</h3>
+            <h3 className="text-lg font-black text-white uppercase italic mb-4">Registrar Nova Versão de Build</h3>
             <form onSubmit={handleCreateBuild} className="space-y-4 text-xs">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Version</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Versão</label>
                   <input 
                     type="text" 
                     required 
@@ -516,7 +516,7 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Class</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Classe</label>
                   <input 
                     type="text" 
                     required 
@@ -526,7 +526,7 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Target PI</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">PI Alvo</label>
                   <input 
                     type="number" 
                     required 
@@ -537,29 +537,29 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Upgrade Package & Parts Description</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Pacote de Upgrades & Descrição das Peças</label>
                 <textarea 
                   required 
                   rows={3} 
-                  placeholder="e.g. Race tire compound + Race ARBs + Turbo upgrade..." 
+                  placeholder="ex: Pneus Slick + Barras Estabilizadoras Race + Upgrade de Turbo..." 
                   value={description} 
                   onChange={e => setDescription(e.target.value)} 
                   className="w-full bg-[#161616] border border-[#333] p-2 text-white" 
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Validation Result / Observation</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Resultado da Validação / Observação</label>
                 <input 
                   type="text" 
-                  placeholder="e.g. Lap time improved by 0.450s at Horizon Mexico" 
+                  placeholder="ex: Tempo de volta reduzido em 0.450s no Horizon Mexico" 
                   value={result} 
                   onChange={e => setResult(e.target.value)} 
                   className="w-full bg-[#161616] border border-[#333] p-2 text-white" 
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-[#222]">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-[#777] hover:text-white uppercase">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-[#ef4444] text-black font-bold uppercase hover:bg-white">Save Build</button>
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-[#777] hover:text-white uppercase">Cancelar</button>
+                <button type="submit" className="px-5 py-2 bg-[#ef4444] text-black font-bold uppercase hover:bg-white">Salvar Build</button>
               </div>
             </form>
           </div>
@@ -573,7 +573,7 @@ function BuildsTab({ car, builds, user }: { car: Car; builds: Build[]; user: any
 // 4. TUNING TAB (The Core Operational Center)
 // ----------------------------------------------------
 function TuningTab({ car, tunes, user }: { car: Car; tunes: Tune[]; user: any }) {
-  const [tuneName, setTuneName] = useState('Standard Circuit Setup');
+  const [tuneName, setTuneName] = useState('Setup Padrão de Circuito');
   const [tuneData, setTuneData] = useState<TuneData>(() => defaultTuneData(car.drivetrain));
   const [selectedTuneId, setSelectedTuneId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -611,7 +611,7 @@ function TuningTab({ car, tunes, user }: { car: Car; tunes: Tune[]; user: any })
       }
     } catch (err) {
       console.error(err);
-      alert('Error saving tune');
+      alert('Erro ao salvar tuning');
     } finally {
       setSaving(false);
     }
@@ -702,9 +702,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
           <button
             onClick={handleResetToBaseline}
             className="px-3 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-xs font-mono text-[#888] hover:text-white uppercase inline-flex items-center gap-1.5 transition-colors"
-            title="Reset to Baseline"
+            title="Restaurar Baseline"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset
+            <RotateCcw className="w-3.5 h-3.5" /> Restaurar
           </button>
 
           <button
@@ -712,7 +712,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             className="px-3 py-1.5 bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] text-xs font-mono text-white uppercase inline-flex items-center gap-1.5 transition-colors"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#10b981]" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'Copied!' : 'Copy to Game'}
+            {copied ? 'Copiado!' : 'Copiar p/ o Jogo'}
           </button>
 
           <button
@@ -721,7 +721,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             className="px-4 py-1.5 bg-[#ef4444] text-black hover:bg-white text-xs font-mono font-black uppercase inline-flex items-center gap-1.5 transition-colors"
           >
             <Save className="w-3.5 h-3.5" />
-            {saving ? 'Saving...' : 'Save Setup'}
+            {saving ? 'Salvando...' : 'Salvar Setup'}
           </button>
         </div>
       </div>
@@ -729,9 +729,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
       {/* Forza Horizon Precision Tuning Sliders */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono">
         {/* 1. TIRES */}
-        <TuneSection title="1. Tires (PSI)">
+        <TuneSection title="1. Pneus (Tires - PSI)">
           <TuneSlider
-            label="Front Tire Pressure"
+            label="Pressão Dianteira (Front Tire Pressure)"
             value={tuneData.tires.frontPSI}
             min={15.0}
             max={45.0}
@@ -740,7 +740,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, tires: { ...tuneData.tires, frontPSI: v } })}
           />
           <TuneSlider
-            label="Rear Tire Pressure"
+            label="Pressão Traseira (Rear Tire Pressure)"
             value={tuneData.tires.rearPSI}
             min={15.0}
             max={45.0}
@@ -751,9 +751,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 2. GEARING */}
-        <TuneSection title="2. Gearing Ratios">
+        <TuneSection title="2. Transmissão & Marchas (Gearing)">
           <TuneSlider
-            label="Final Drive"
+            label="Transmissão Final (Final Drive)"
             value={tuneData.gearing.finalDrive}
             min={2.20}
             max={5.50}
@@ -765,7 +765,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
               const key = `gear${gearNum}` as keyof typeof tuneData.gearing;
               return (
                 <div key={gearNum} className="p-2 bg-[#0a0a0a] border border-[#1f1f1f]">
-                  <span className="text-[9px] uppercase text-[#666] block">Gear {gearNum}</span>
+                  <span className="text-[9px] uppercase text-[#666] block">Marcha {gearNum}</span>
                   <input
                     type="number"
                     step={0.01}
@@ -783,9 +783,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 3. ALIGNMENT */}
-        <TuneSection title="3. Alignment">
+        <TuneSection title="3. Alinhamento (Alignment)">
           <TuneSlider
-            label="Front Camber"
+            label="Camber Dianteiro (Front Camber)"
             value={tuneData.alignment.camberFront}
             min={-5.0}
             max={0.0}
@@ -794,7 +794,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, alignment: { ...tuneData.alignment, camberFront: v } })}
           />
           <TuneSlider
-            label="Rear Camber"
+            label="Camber Traseiro (Rear Camber)"
             value={tuneData.alignment.camberRear}
             min={-5.0}
             max={0.0}
@@ -803,7 +803,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, alignment: { ...tuneData.alignment, camberRear: v } })}
           />
           <TuneSlider
-            label="Front Toe"
+            label="Convergência Dianteira (Front Toe)"
             value={tuneData.alignment.toeFront}
             min={-1.0}
             max={1.0}
@@ -812,7 +812,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, alignment: { ...tuneData.alignment, toeFront: v } })}
           />
           <TuneSlider
-            label="Rear Toe"
+            label="Convergência Traseira (Rear Toe)"
             value={tuneData.alignment.toeRear}
             min={-1.0}
             max={1.0}
@@ -821,7 +821,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, alignment: { ...tuneData.alignment, toeRear: v } })}
           />
           <TuneSlider
-            label="Front Caster Angle"
+            label="Caster Dianteiro (Front Caster Angle)"
             value={tuneData.alignment.caster}
             min={1.0}
             max={7.0}
@@ -832,9 +832,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 4. ANTI-ROLL BARS */}
-        <TuneSection title="4. Anti-Roll Bars (ARBs)">
+        <TuneSection title="4. Barras Estabilizadoras (ARBs)">
           <TuneSlider
-            label="Front Anti-Roll Bar"
+            label="Barra Dianteira (Front Anti-Roll Bar)"
             value={tuneData.antiRollBars.front}
             min={1.0}
             max={65.0}
@@ -842,7 +842,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, antiRollBars: { ...tuneData.antiRollBars, front: v } })}
           />
           <TuneSlider
-            label="Rear Anti-Roll Bar"
+            label="Barra Traseira (Rear Anti-Roll Bar)"
             value={tuneData.antiRollBars.rear}
             min={1.0}
             max={65.0}
@@ -852,9 +852,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 5. SPRINGS & RIDE HEIGHT */}
-        <TuneSection title="5. Springs & Ride Height">
+        <TuneSection title="5. Molas & Altura (Springs & Ride Height)">
           <TuneSlider
-            label="Front Springs"
+            label="Molas Dianteiras (Front Springs)"
             value={tuneData.springs.frontSprings}
             min={50.0}
             max={350.0}
@@ -863,7 +863,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, springs: { ...tuneData.springs, frontSprings: v } })}
           />
           <TuneSlider
-            label="Rear Springs"
+            label="Molas Traseiras (Rear Springs)"
             value={tuneData.springs.rearSprings}
             min={50.0}
             max={350.0}
@@ -872,7 +872,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, springs: { ...tuneData.springs, rearSprings: v } })}
           />
           <TuneSlider
-            label="Front Ride Height"
+            label="Altura Dianteira (Front Ride Height)"
             value={tuneData.springs.rideHeightFront}
             min={5.0}
             max={25.0}
@@ -881,7 +881,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, springs: { ...tuneData.springs, rideHeightFront: v } })}
           />
           <TuneSlider
-            label="Rear Ride Height"
+            label="Altura Traseira (Rear Ride Height)"
             value={tuneData.springs.rideHeightRear}
             min={5.0}
             max={25.0}
@@ -892,9 +892,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 6. DAMPING */}
-        <TuneSection title="6. Damping (Rebound & Bump)">
+        <TuneSection title="6. Amortecimento (Damping: Rebound & Bump)">
           <TuneSlider
-            label="Front Rebound Stiffness"
+            label="Rigidez de Retorno Dianteiro (Front Rebound)"
             value={tuneData.damping.reboundFront}
             min={1.0}
             max={20.0}
@@ -902,7 +902,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, damping: { ...tuneData.damping, reboundFront: v } })}
           />
           <TuneSlider
-            label="Rear Rebound Stiffness"
+            label="Rigidez de Retorno Traseiro (Rear Rebound)"
             value={tuneData.damping.reboundRear}
             min={1.0}
             max={20.0}
@@ -910,7 +910,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, damping: { ...tuneData.damping, reboundRear: v } })}
           />
           <TuneSlider
-            label="Front Bump Stiffness"
+            label="Rigidez de Compressão Dianteira (Front Bump)"
             value={tuneData.damping.bumpFront}
             min={1.0}
             max={20.0}
@@ -918,7 +918,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, damping: { ...tuneData.damping, bumpFront: v } })}
           />
           <TuneSlider
-            label="Rear Bump Stiffness"
+            label="Rigidez de Compressão Traseira (Rear Bump)"
             value={tuneData.damping.bumpRear}
             min={1.0}
             max={20.0}
@@ -928,9 +928,9 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 7. AERO & BRAKE */}
-        <TuneSection title="7. Aero Downforce & Brakes">
+        <TuneSection title="7. Aerodinâmica & Freios (Aero & Brakes)">
           <TuneSlider
-            label="Front Downforce"
+            label="Downforce Dianteiro (Front Aero)"
             value={tuneData.aero.frontDownforce}
             min={20}
             max={350}
@@ -939,7 +939,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, aero: { ...tuneData.aero, frontDownforce: v } })}
           />
           <TuneSlider
-            label="Rear Downforce"
+            label="Downforce Traseiro (Rear Aero)"
             value={tuneData.aero.rearDownforce}
             min={20}
             max={450}
@@ -948,7 +948,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, aero: { ...tuneData.aero, rearDownforce: v } })}
           />
           <TuneSlider
-            label="Brake Balance (% Front)"
+            label="Balanço dos Freios (% Dianteiro)"
             value={tuneData.brake.balanceFront}
             min={30}
             max={70}
@@ -957,7 +957,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, brake: { ...tuneData.brake, balanceFront: v } })}
           />
           <TuneSlider
-            label="Brake Pressure"
+            label="Pressão dos Freios (Brake Pressure)"
             value={tuneData.brake.pressure}
             min={50}
             max={150}
@@ -968,11 +968,11 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
         </TuneSection>
 
         {/* 8. DIFFERENTIAL */}
-        <TuneSection title="8. Differential">
+        <TuneSection title="8. Diferencial (Differential)">
           {isAWD && (
             <>
               <TuneSlider
-                label="Front Acceleration"
+                label="Aceleração Dianteira (Front Accel)"
                 value={tuneData.differential.frontAccel ?? 25}
                 min={0}
                 max={100}
@@ -981,7 +981,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
                 onChange={v => setTuneData({ ...tuneData, differential: { ...tuneData.differential, frontAccel: v } })}
               />
               <TuneSlider
-                label="Front Deceleration"
+                label="Desaceleração Dianteira (Front Decel)"
                 value={tuneData.differential.frontDecel ?? 0}
                 min={0}
                 max={100}
@@ -993,7 +993,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
           )}
 
           <TuneSlider
-            label="Rear Acceleration"
+            label="Aceleração Traseira (Rear Accel)"
             value={tuneData.differential.rearAccel}
             min={0}
             max={100}
@@ -1002,7 +1002,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
             onChange={v => setTuneData({ ...tuneData, differential: { ...tuneData.differential, rearAccel: v } })}
           />
           <TuneSlider
-            label="Rear Deceleration"
+            label="Desaceleração Traseira (Rear Decel)"
             value={tuneData.differential.rearDecel}
             min={0}
             max={100}
@@ -1013,7 +1013,7 @@ ${tuneData.differential.centerBalance !== undefined ? `Center Balance: ${tuneDat
 
           {isAWD && (
             <TuneSlider
-              label="Center Balance (% Rear Power)"
+              label="Balanço Central (% Potência Traseira)"
               value={tuneData.differential.centerBalance ?? 65}
               min={10}
               max={90}
@@ -1128,28 +1128,28 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
         <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#1c1c1c]">
           <div>
             <h3 className="text-xs uppercase font-mono font-bold tracking-widest text-[#ef4444]">
-              Empirical Track Experiments
+              Experimentos Empíricos de Pista
             </h3>
             <p className="text-xs text-[#666] font-mono mt-0.5">
-              Targeted A/B test iterations specifically logged for {car.brand} {car.model}.
+              Iterações de teste A/B registradas especificamente para {car.brand} {car.model}.
             </p>
           </div>
           <button
             onClick={() => setShowModal(true)}
             className="px-4 py-2 bg-[#ef4444] text-black hover:bg-white text-xs font-mono font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
           >
-            <Plus className="w-3.5 h-3.5" /> Log Experiment
+            <Plus className="w-3.5 h-3.5" /> Registrar Experimento
           </button>
         </div>
 
         {tests.length === 0 ? (
           <div className="py-12 text-center border border-dashed border-[#222] bg-[#080808]">
-            <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NO EXPERIMENTS LOGGED FOR THIS CAR</p>
+            <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NENHUM EXPERIMENTO REGISTRADO PARA ESTE CARRO</p>
             <button
               onClick={() => setShowModal(true)}
               className="text-xs text-[#ef4444] font-mono uppercase font-bold hover:underline"
             >
-              + Create Experiment #001
+              + Criar Experimento #001
             </button>
           </div>
         ) : (
@@ -1166,17 +1166,17 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
                   <span className={`text-[9px] px-2 py-0.5 uppercase font-bold border ${
                     test.status === 'Completed' ? 'text-[#10b981] border-[#10b981]/30 bg-[#10b981]/10' : 'text-[#eab308] border-[#eab308]/30 bg-[#eab308]/10'
                   }`}>
-                    {test.status}
+                    {test.status === 'Completed' ? 'Concluído' : test.status === 'Pending' ? 'Pendente' : 'Descartado'}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-[#121212] border border-[#1f1f1f] text-xs my-3">
                   <div>
-                    <span className="text-[9px] text-[#666] uppercase block">Test Track</span>
+                    <span className="text-[9px] text-[#666] uppercase block">Pista / Circuito</span>
                     <span className="text-white font-bold">{test.track || 'Free Roam'}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-[#666] uppercase block">Variable Tested</span>
+                    <span className="text-[9px] text-[#666] uppercase block">Variável Modificada</span>
                     <span className="text-white font-bold">{test.variable}</span>
                   </div>
                   <div>
@@ -1187,7 +1187,7 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
 
                 {test.result && (
                   <p className="text-xs text-[#ccc] leading-relaxed">
-                    <span className="text-[#ef4444] font-bold">Observation:</span> {test.result}
+                    <span className="text-[#ef4444] font-bold">Observação:</span> {test.result}
                   </p>
                 )}
               </div>
@@ -1199,14 +1199,14 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
       {showModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-[#0e0e0e] border border-[#333] w-full max-w-lg p-6 font-mono text-xs">
-            <h3 className="text-lg font-black text-white uppercase italic mb-4">Log Test Lab Experiment</h3>
+            <h3 className="text-lg font-black text-white uppercase italic mb-4">Registrar Experimento de Teste</h3>
             <form onSubmit={handleCreateTest} className="space-y-4">
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Objective</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Objetivo</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Improve corner exit traction out of hairpin"
+                  placeholder="ex: Melhorar tração de saída em curva de baixa"
                   value={objective}
                   onChange={e => setObjective(e.target.value)}
                   className="w-full bg-[#161616] border border-[#333] p-2 text-white"
@@ -1214,22 +1214,22 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Track Context</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Contexto de Pista</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Suzuka, Horizon Mexico Circuit"
+                    placeholder="ex: Circuito Horizon México, Suzuka"
                     value={track}
                     onChange={e => setTrack(e.target.value)}
                     className="w-full bg-[#161616] border border-[#333] p-2 text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Variable Modified</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Variável Modificada</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Rear Diff Accel"
+                    placeholder="ex: Rear Diff Accel"
                     value={variable}
                     onChange={e => setVariable(e.target.value)}
                     className="w-full bg-[#161616] border border-[#333] p-2 text-white"
@@ -1238,7 +1238,7 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">Before Value</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Valor Anterior</label>
                   <input
                     type="text"
                     required
@@ -1248,7 +1248,7 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-[#777] mb-1">After Value</label>
+                  <label className="block text-[10px] uppercase text-[#777] mb-1">Novo Valor</label>
                   <input
                     type="text"
                     required
@@ -1259,18 +1259,18 @@ function TestsTab({ car, tests, user, builds }: { car: Car; tests: TestExperimen
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-[#777] mb-1">Empirical Result</label>
+                <label className="block text-[10px] uppercase text-[#777] mb-1">Resultado Empírico</label>
                 <textarea
                   rows={2}
-                  placeholder="e.g. Lap time dropped by 0.350s, snap oversteer eliminated."
+                  placeholder="ex: Tempo de volta caiu 0.350s, sobresterço repentino eliminado."
                   value={result}
                   onChange={e => setResult(e.target.value)}
                   className="w-full bg-[#161616] border border-[#333] p-2 text-white"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-[#222]">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-[#777] hover:text-white uppercase">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-[#ef4444] text-black font-bold uppercase hover:bg-white">Save Experiment</button>
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-[#777] hover:text-white uppercase">Cancelar</button>
+                <button type="submit" className="px-5 py-2 bg-[#ef4444] text-black font-bold uppercase hover:bg-white">Salvar Experimento</button>
               </div>
             </form>
           </div>
@@ -1345,11 +1345,11 @@ function TelemetryTab({ car }: { car: Car }) {
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${simulatedLive ? 'bg-[#10b981] animate-pulse' : 'bg-[#ef4444]'}`}></span>
               <h3 className="text-xs uppercase font-bold tracking-widest text-white">
-                {simulatedLive ? 'LIVE TELEMETRY STREAMING' : 'TELEMETRY NOT CONNECTED'}
+                {simulatedLive ? 'STREAMING DE TELEMETRIA AO VIVO' : 'TELEMETRIA DESCONECTADA'}
               </h3>
             </div>
             <p className="text-xs text-[#666] mt-0.5">
-              Protocol: Forza Horizon Data Out UDP Packet (v2/Dash Format).
+              Protocolo: Forza Horizon Data Out UDP Packet (v2/Formato Dash).
             </p>
           </div>
 
@@ -1361,64 +1361,64 @@ function TelemetryTab({ car }: { car: Car }) {
                 : 'bg-[#181818] border-[#333] text-white hover:bg-[#222]'
             }`}
           >
-            {simulatedLive ? 'Disconnect Stream' : 'Test Loopback / Stream Simulator'}
+            {simulatedLive ? 'Desconectar Stream' : 'Testar Loopback / Simulador de Stream'}
           </button>
         </div>
 
         {/* UDP Connection Setup Details */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-[#080808] border border-[#1a1a1a] text-xs">
           <div>
-            <span className="text-[10px] text-[#666] uppercase block">In-Game Data Out IP</span>
-            <span className="text-white font-bold">127.0.0.1 (or Local Host IP)</span>
+            <span className="text-[10px] text-[#666] uppercase block">IP de Saída de Dados no Jogo</span>
+            <span className="text-white font-bold">127.0.0.1 (ou IP Local da Máquina)</span>
           </div>
           <div>
-            <span className="text-[10px] text-[#666] uppercase block">UDP Port</span>
+            <span className="text-[10px] text-[#666] uppercase block">Porta UDP</span>
             <span className="text-white font-bold">5300</span>
           </div>
           <div>
-            <span className="text-[10px] text-[#666] uppercase block">Packet Rate</span>
-            <span className="text-[#10b981] font-bold">60 Hz Synchronous</span>
+            <span className="text-[10px] text-[#666] uppercase block">Taxa de Atualização</span>
+            <span className="text-[#10b981] font-bold">60 Hz Síncrono</span>
           </div>
         </div>
 
         {/* Telemetry Gauge Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-4 bg-[#121212] border border-[#1f1f1f]">
-            <span className="text-[9px] text-[#666] uppercase block">Speed</span>
+            <span className="text-[9px] text-[#666] uppercase block">Velocidade</span>
             <div className="text-2xl font-black text-white">{telemetryState.speedKmh} <span className="text-xs text-[#666] font-normal">KM/H</span></div>
           </div>
           <div className="p-4 bg-[#121212] border border-[#1f1f1f]">
-            <span className="text-[9px] text-[#666] uppercase block">Engine RPM</span>
+            <span className="text-[9px] text-[#666] uppercase block">RPM do Motor</span>
             <div className="text-2xl font-black text-[#ef4444]">{telemetryState.rpm}</div>
           </div>
           <div className="p-4 bg-[#121212] border border-[#1f1f1f]">
-            <span className="text-[9px] text-[#666] uppercase block">Active Gear</span>
+            <span className="text-[9px] text-[#666] uppercase block">Marcha Atual</span>
             <div className="text-2xl font-black text-white">{telemetryState.gear}</div>
           </div>
           <div className="p-4 bg-[#121212] border border-[#1f1f1f]">
-            <span className="text-[9px] text-[#666] uppercase block">Lateral G-Force</span>
+            <span className="text-[9px] text-[#666] uppercase block">Força G Lateral</span>
             <div className="text-2xl font-black text-[#10b981]">{telemetryState.latG}G</div>
           </div>
         </div>
 
         {/* Tire Slip Angles Matrix */}
         <div className="mt-6 p-4 bg-[#080808] border border-[#1a1a1a]">
-          <h4 className="text-[10px] text-[#777] uppercase font-bold tracking-wider mb-3">Tire Slip Ratio Vector</h4>
+          <h4 className="text-[10px] text-[#777] uppercase font-bold tracking-wider mb-3">Vetor de Deslizamento de Pneus (Tire Slip)</h4>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div className="p-3 bg-[#121212] border border-[#1f1f1f] flex justify-between">
-              <span className="text-[#888]">Front Left (FL)</span>
+              <span className="text-[#888]">Dianteiro Esquerdo (FL)</span>
               <span className="font-bold text-white">{telemetryState.tireSlipFL}</span>
             </div>
             <div className="p-3 bg-[#121212] border border-[#1f1f1f] flex justify-between">
-              <span className="text-[#888]">Front Right (FR)</span>
+              <span className="text-[#888]">Dianteiro Direito (FR)</span>
               <span className="font-bold text-white">{telemetryState.tireSlipFR}</span>
             </div>
             <div className="p-3 bg-[#121212] border border-[#1f1f1f] flex justify-between">
-              <span className="text-[#888]">Rear Left (RL)</span>
+              <span className="text-[#888]">Traseiro Esquerdo (RL)</span>
               <span className="font-bold text-white">{telemetryState.tireSlipRL}</span>
             </div>
             <div className="p-3 bg-[#121212] border border-[#1f1f1f] flex justify-between">
-              <span className="text-[#888]">Rear Right (RR)</span>
+              <span className="text-[#888]">Traseiro Direito (RR)</span>
               <span className="font-bold text-white">{telemetryState.tireSlipRR}</span>
             </div>
           </div>
@@ -1445,7 +1445,7 @@ function CarAIEngineerTab({
   const [messages, setMessages] = useState<Array<{ role: string; text: string }>>([
     {
       role: 'ai',
-      text: `Context locked on ${car.brand} ${car.model} (${car.carClass} ${car.pi} ${car.drivetrain}). I have reviewed ${builds.length} builds, ${tunes.length} tune profiles, and ${tests.length} track test results. How would you like to optimize this machine?`
+      text: `Contexto fixado em ${car.brand} ${car.model} (${car.carClass} ${car.pi} ${car.drivetrain}). Analisei ${builds.length} builds, ${tunes.length} perfis de tuning e ${tests.length} experimentos de pista. Como deseja otimizar este carro hoje?`
     }
   ]);
   const [input, setInput] = useState('');
@@ -1494,7 +1494,7 @@ function CarAIEngineerTab({
       setMessages(prev => [...prev, { role: 'ai', text: data.text }]);
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: 'ai', text: '[ENGINEERING CORE ERROR] Failed to compute response.' }]);
+      setMessages(prev => [...prev, { role: 'ai', text: '[FALHA NO NÚCLEO DE ENGENHARIA] Falha ao processar resposta.' }]);
     } finally {
       setLoading(false);
     }
@@ -1507,10 +1507,10 @@ function CarAIEngineerTab({
         <div className="flex items-center gap-2">
           <Cpu className="w-4 h-4 text-[#ef4444]" />
           <span className="text-xs text-white font-bold uppercase">
-            Context: {car.brand} {car.model} ({car.carClass} {car.pi})
+            Contexto: {car.brand} {car.model} ({car.carClass} {car.pi})
           </span>
         </div>
-        <span className="text-[10px] text-[#10b981] font-bold uppercase">Telemetry & Setup Injected</span>
+        <span className="text-[10px] text-[#10b981] font-bold uppercase">Telemetria & Setup Injetados</span>
       </div>
 
       {/* Messages */}
@@ -1529,7 +1529,7 @@ function CarAIEngineerTab({
         {loading && (
           <div className="flex items-center gap-2 text-xs text-[#777] p-4 bg-[#151515] border-l-2 border-[#ef4444] w-fit">
             <Loader2 className="w-4 h-4 animate-spin text-[#ef4444]" />
-            <span>Calculating vehicle physics and telemetry delta...</span>
+            <span>Calculando física do veículo e delta de telemetria...</span>
           </div>
         )}
       </div>
@@ -1537,10 +1537,10 @@ function CarAIEngineerTab({
       {/* Quick Prompts */}
       <div className="p-3 bg-[#0c0c0c] border-t border-[#1a1a1a] flex gap-2 overflow-x-auto scrollbar-none">
         {[
-          'Analyze differential for corner exit',
-          'Calculate ideal spring rates for this weight',
-          'Suggest gearing final drive for high top speed',
-          'Diagnose low-speed understeer'
+          'Analisar diferencial para saída de curva',
+          'Calcular molas ideais para este peso',
+          'Sugerir relação de marchas para alta velocidade final',
+          'Diagnosticar subesterço em baixa velocidade'
         ].map((prompt, i) => (
           <button
             key={i}
@@ -1564,7 +1564,7 @@ function CarAIEngineerTab({
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder={`Ask AI Engineer about ${car.model}...`}
+          placeholder={`Pergunte ao Engenheiro IA sobre o ${car.model}...`}
           className="flex-1 bg-[#141414] border border-[#262626] p-3 text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#ef4444]"
         />
         <button
@@ -1572,7 +1572,7 @@ function CarAIEngineerTab({
           disabled={loading || !input.trim()}
           className="px-5 bg-[#ef4444] text-black hover:bg-white text-xs font-bold uppercase transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
         >
-          <Send className="w-3.5 h-3.5" /> Send
+          <Send className="w-3.5 h-3.5" /> Enviar
         </button>
       </form>
     </div>

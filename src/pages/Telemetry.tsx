@@ -1,38 +1,34 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Activity, 
-  Radio, 
   Wifi, 
   WifiOff, 
-  Play, 
-  Square, 
-  RotateCcw,
-  Gauge, 
-  Sliders, 
-  Terminal, 
   Download, 
-  Sparkles, 
   Flame, 
   Zap, 
   ArrowRight, 
   Copy, 
   Check, 
-  ChevronRight, 
-  Layers,
+  RotateCcw,
+  Sliders, 
+  Terminal, 
   Cpu,
   Compass,
-  Volume2,
-  VolumeX,
-  Keyboard
+  Gauge,
+  Layers,
+  HelpCircle,
+  Play
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-interface TelemetryFrame {
+export interface TelemetryFrame {
   timestamp: number;
+  isRaceOn: boolean;
   speedKmh: number;
   speedMph: number;
   rpm: number;
   maxRpm: number;
+  idleRpm: number;
   gear: number | string;
   throttle: number; // 0-100%
   brake: number;    // 0-100%
@@ -40,11 +36,12 @@ interface TelemetryFrame {
   handbrake: number; // 0 or 1
   steer: number;    // -1.0 to 1.0
   boostPsi: number;
+  fuel: number;
   torqueNm: number;
   powerHp: number;
   accelX: number; // Lateral G
-  accelY: number; // Longitudinal G
-  accelZ: number; // Vertical G
+  accelY: number; // Vertical G
+  accelZ: number; // Longitudinal G
   yaw: number;
   pitch: number;
   roll: number;
@@ -64,281 +61,76 @@ interface TelemetryFrame {
   suspensionTravelFR: number; // mm
   suspensionTravelRL: number; // mm
   suspensionTravelRR: number; // mm
+  carOrdinal?: number;
+  carClass?: number;
+  carPI?: number;
+  drivetrainType?: string;
+  lapNumber?: number;
+  currentLapTime?: number;
+  bestLapTime?: number;
+  lastLapTime?: number;
 }
 
-const DEFAULT_FRAME: TelemetryFrame = {
-  timestamp: 0,
-  speedKmh: 0,
-  speedMph: 0,
-  rpm: 950,
-  maxRpm: 8600,
-  gear: 'N',
-  throttle: 0,
-  brake: 0,
-  clutch: 0,
-  handbrake: 0,
-  steer: 0,
-  boostPsi: 0,
-  torqueNm: 420,
-  powerHp: 580,
-  accelX: 0,
-  accelY: 0,
-  accelZ: 1.0,
-  yaw: 0,
-  pitch: 0,
-  roll: 0,
-  tireTempFL: { inner: 86, center: 88, outer: 89 },
-  tireTempFR: { inner: 86, center: 88, outer: 89 },
-  tireTempRL: { inner: 90, center: 92, outer: 93 },
-  tireTempRR: { inner: 90, center: 92, outer: 93 },
-  tirePressureFL: 30.5,
-  tirePressureFR: 30.5,
-  tirePressureRL: 29.8,
-  tirePressureRR: 29.8,
-  tireSlipFL: 0.01,
-  tireSlipFR: 0.01,
-  tireSlipRL: 0.01,
-  tireSlipRR: 0.01,
-  suspensionTravelFL: 65,
-  suspensionTravelFR: 65,
-  suspensionTravelRL: 72,
-  suspensionTravelRR: 72,
-};
-
-const TRACK_PROFILES = [
-  { id: 'festival', name: 'Horizon Festival Circuit', type: 'Technical Circuit', lapDistance: '3.4 km' },
-  { id: 'caldera', name: 'La Gran Caldera Touge', type: 'High Elevation Hillclimb', lapDistance: '5.2 km' },
-  { id: 'aerodromo', name: 'Aeródromo 1/4 Mile Drag', type: 'Acceleration & Braking', lapDistance: '0.8 km' },
-  { id: 'goliath', name: 'The Goliath 50km Enduro', type: 'High Speed Downforce', lapDistance: '52.1 km' }
-];
-
 export function Telemetry() {
-  const [streamSource, setStreamSource] = useState<'simulator' | 'live_udp'>('simulator');
-  const [isStreaming, setIsStreaming] = useState(true);
-  const [selectedTrack, setSelectedTrack] = useState('festival');
-  const [manualDriveMode, setManualDriveMode] = useState(false);
-  const [copiedScript, setCopiedScript] = useState(false);
-  const [showBridgeModal, setShowBridgeModal] = useState(false);
-
-  // Telemetry state
-  const [telemetry, setTelemetry] = useState<TelemetryFrame>(DEFAULT_FRAME);
+  const navigate = useNavigate();
+  const [isConnected, setIsConnected] = useState(false);
+  const [frequencyHz, setFrequencyHz] = useState(0);
   const [packetCount, setPacketCount] = useState(0);
-  const [packetHistory, setPacketHistory] = useState<TelemetryFrame[]>([]);
-  const [liveUdpConnected, setLiveUdpConnected] = useState(false);
-
-  // Driving performance stats
-  const [lapTime, setLapTime] = useState(0);
-  const [bestLapTime, setBestLapTime] = useState(64.82);
-  const [topSpeedKmh, setTopSpeedKmh] = useState(0);
-  const [maxLateralG, setMaxLateralG] = useState(0);
-  const [accelZeroToHundred, setAccelZeroToHundred] = useState<number | null>(3.15);
-
-  // Manual drive inputs
-  const manualInputs = useRef({
-    throttle: 0,
-    brake: 0,
-    steer: 0,
-    handbrake: 0,
-    gear: 1
+  const [telemetry, setTelemetry] = useState<TelemetryFrame | null>(null);
+  const [sessionStats, setSessionStats] = useState({
+    topSpeedKmh: 0,
+    maxLateralG: 0,
+    maxBrakingG: 0,
+    maxRpm: 0,
+    activeLaps: 0,
+    bestLapTime: 0,
+    totalPackets: 0
   });
+  const [historyBuffer, setHistoryBuffer] = useState<TelemetryFrame[]>([]);
+  const [showBridgeModal, setShowBridgeModal] = useState(false);
+  const [copiedScript, setCopiedScript] = useState(false);
+  const [testingConnection, setTestingConnection] = useState(false);
 
   const ggCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Keyboard controls for manual driving mode
+  // Poll server for live real telemetry data at high frequency (60ms)
   useEffect(() => {
-    if (!manualDriveMode) return;
+    let mounted = true;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowUp', 'KeyW'].includes(e.code)) manualInputs.current.throttle = 100;
-      if (['ArrowDown', 'KeyS'].includes(e.code)) manualInputs.current.brake = 100;
-      if (['ArrowLeft', 'KeyA'].includes(e.code)) manualInputs.current.steer = -0.75;
-      if (['ArrowRight', 'KeyD'].includes(e.code)) manualInputs.current.steer = 0.75;
-      if (e.code === 'Space') manualInputs.current.handbrake = 1;
-      if (e.code === 'KeyE') manualInputs.current.gear = Math.min(6, (Number(manualInputs.current.gear) || 1) + 1);
-      if (e.code === 'KeyQ') manualInputs.current.gear = Math.max(1, (Number(manualInputs.current.gear) || 1) - 1);
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (['ArrowUp', 'KeyW'].includes(e.code)) manualInputs.current.throttle = 0;
-      if (['ArrowDown', 'KeyS'].includes(e.code)) manualInputs.current.brake = 0;
-      if (['ArrowLeft', 'KeyA', 'ArrowRight', 'KeyD'].includes(e.code)) manualInputs.current.steer = 0;
-      if (e.code === 'Space') manualInputs.current.handbrake = 0;
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [manualDriveMode]);
-
-  // Live UDP Polling
-  useEffect(() => {
-    if (streamSource !== 'live_udp' || !isStreaming) return;
-
-    const interval = setInterval(async () => {
+    const poll = async () => {
       try {
         const res = await fetch('/api/telemetry/latest');
-        if (res.ok) {
+        if (res.ok && mounted) {
           const json = await res.json();
-          setLiveUdpConnected(json.connected);
-          if (json.data) {
+          setIsConnected(json.connected);
+          setFrequencyHz(json.frequencyHz || 0);
+          setPacketCount(json.packetCount || 0);
+          if (json.stats) setSessionStats(json.stats);
+          if (json.buffer) setHistoryBuffer(json.buffer);
+
+          if (json.connected && json.data) {
             setTelemetry(json.data);
-            setPacketCount(json.packetCount);
+          } else {
+            setTelemetry(null);
           }
         }
       } catch (err) {
-        setLiveUdpConnected(false);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [streamSource, isStreaming]);
-
-  // Simulator Physics Engine Loop (60 Hz)
-  useEffect(() => {
-    if (streamSource !== 'simulator' || !isStreaming) return;
-
-    const interval = setInterval(() => {
-      const t = Date.now() / 1000;
-      setPacketCount(prev => prev + 1);
-      setLapTime(prev => Number((prev + 0.05).toFixed(2)));
-
-      let speed = 0;
-      let rpm = 950;
-      let gear: any = '1';
-      let throttle = 0;
-      let brake = 0;
-      let steer = 0;
-      let handbrake = 0;
-      let boost = 0;
-      let accelX = 0;
-      let accelY = 0;
-
-      if (manualDriveMode) {
-        throttle = manualInputs.current.throttle;
-        brake = manualInputs.current.brake;
-        steer = manualInputs.current.steer;
-        handbrake = manualInputs.current.handbrake;
-        gear = manualInputs.current.gear;
-
-        const currentSpeed = telemetry.speedKmh;
-        const targetSpeed = throttle > 0 ? currentSpeed + (throttle / 100) * 4.5 : brake > 0 ? Math.max(0, currentSpeed - 8.0) : Math.max(0, currentSpeed - 0.8);
-        speed = Math.min(365, Math.round(targetSpeed));
-        rpm = Math.min(8500, Math.round(1200 + (speed % 60) * 120));
-        boost = throttle > 50 ? Number((1.2 + Math.sin(t * 5) * 0.4).toFixed(1)) : 0;
-        accelX = Number((steer * (speed / 120) * 1.6).toFixed(2));
-        accelY = throttle > 0 ? 0.85 : brake > 0 ? -1.45 : -0.1;
-      } else {
-        // Track-specific simulated racing telemetry
-        if (selectedTrack === 'festival') {
-          // Racing lines, chicanes, apex braking
-          const phase = Math.sin(t * 0.8);
-          const cornering = Math.sin(t * 1.6);
-          speed = Math.floor(180 + phase * 65 + cornering * 25);
-          rpm = Math.floor(6200 + Math.sin(t * 2.5) * 1800);
-          gear = speed > 220 ? '5' : speed > 165 ? '4' : speed > 115 ? '3' : '2';
-          throttle = phase > -0.2 ? Math.floor(80 + Math.sin(t * 2) * 20) : 10;
-          brake = phase < -0.3 ? Math.floor(Math.abs(phase) * 85) : 0;
-          steer = Number((cornering * 0.65).toFixed(2));
-          boost = throttle > 70 ? Number((18.4 + Math.sin(t) * 2.2).toFixed(1)) : 2.5;
-          accelX = Number((cornering * 1.55).toFixed(2));
-          accelY = brake > 0 ? -1.25 : throttle > 70 ? 0.75 : 0.05;
-        } else if (selectedTrack === 'caldera') {
-          // Mountain drift, extreme steering angle, high tire slip
-          speed = Math.floor(130 + Math.sin(t * 1.1) * 45);
-          rpm = Math.floor(6800 + Math.sin(t * 4) * 1400);
-          gear = '3';
-          throttle = 95;
-          brake = Math.abs(Math.sin(t * 0.7)) > 0.8 ? 40 : 0;
-          steer = Number((Math.sin(t * 1.4) * 0.9).toFixed(2));
-          boost = 21.5;
-          accelX = Number((Math.sin(t * 1.4) * 1.75).toFixed(2));
-          accelY = 0.45;
-        } else if (selectedTrack === 'aerodromo') {
-          // Standing drag acceleration
-          const dragCycle = (t % 15) / 15;
-          speed = Math.floor(dragCycle * 340);
-          rpm = Math.floor(3500 + (speed % 55) * 90);
-          gear = speed > 280 ? '6' : speed > 220 ? '5' : speed > 160 ? '4' : speed > 100 ? '3' : speed > 45 ? '2' : '1';
-          throttle = dragCycle < 0.85 ? 100 : 0;
-          brake = dragCycle >= 0.85 ? 100 : 0;
-          steer = 0.02;
-          boost = 24.2;
-          accelX = 0.05;
-          accelY = dragCycle < 0.85 ? Number((1.65 - dragCycle * 1.1).toFixed(2)) : -1.85;
-        } else {
-          // Goliath top speed enduro
-          speed = Math.floor(310 + Math.sin(t * 0.5) * 55);
-          rpm = Math.floor(7400 + Math.sin(t * 1.2) * 800);
-          gear = '6';
-          throttle = 100;
-          brake = 0;
-          steer = Number((Math.sin(t * 0.4) * 0.35).toFixed(2));
-          boost = 19.8;
-          accelX = Number((Math.sin(t * 0.4) * 1.25).toFixed(2));
-          accelY = 0.25;
+        if (mounted) {
+          setIsConnected(false);
+          setFrequencyHz(0);
+          setTelemetry(null);
         }
       }
+    };
 
-      // 4-Corner Tire calculations
-      const flTemp = Math.floor(88 + Math.abs(accelX) * 12 + brake * 0.1);
-      const frTemp = Math.floor(88 + Math.abs(accelX) * 12 + brake * 0.1);
-      const rlTemp = Math.floor(92 + throttle * 0.08 + Math.abs(accelX) * 8);
-      const rrTemp = Math.floor(92 + throttle * 0.08 + Math.abs(accelX) * 8);
+    const interval = setInterval(poll, 80);
+    poll();
 
-      const frame: TelemetryFrame = {
-        timestamp: Date.now(),
-        speedKmh: speed,
-        speedMph: Math.floor(speed * 0.621371),
-        rpm: rpm,
-        maxRpm: 8600,
-        gear: gear,
-        throttle: throttle,
-        brake: brake,
-        clutch: 0,
-        handbrake: handbrake,
-        steer: steer,
-        boostPsi: boost,
-        torqueNm: Math.floor(580 + (rpm / 8500) * 220),
-        powerHp: Math.floor((rpm * (580 + (rpm / 8500) * 220)) / 7127),
-        accelX: accelX,
-        accelY: accelY,
-        accelZ: 1.0,
-        yaw: Number((steer * 0.3).toFixed(2)),
-        pitch: Number((-accelY * 0.05).toFixed(2)),
-        roll: Number((accelX * 0.06).toFixed(2)),
-        tireTempFL: { inner: flTemp + 3, center: flTemp, outer: flTemp - 2 },
-        tireTempFR: { inner: frTemp - 2, center: frTemp, outer: frTemp + 3 },
-        tireTempRL: { inner: rlTemp + 2, center: rlTemp, outer: rlTemp - 1 },
-        tireTempRR: { inner: rrTemp - 1, center: rrTemp, outer: rrTemp + 2 },
-        tirePressureFL: Number((30.0 + flTemp * 0.03).toFixed(1)),
-        tirePressureFR: Number((30.0 + frTemp * 0.03).toFixed(1)),
-        tirePressureRL: Number((29.5 + rlTemp * 0.03).toFixed(1)),
-        tirePressureRR: Number((29.5 + rrTemp * 0.03).toFixed(1)),
-        tireSlipFL: Number((0.02 + Math.abs(accelX) * 0.11 + (brake > 0 ? 0.08 : 0)).toFixed(2)),
-        tireSlipFR: Number((0.02 + Math.abs(accelX) * 0.11 + (brake > 0 ? 0.08 : 0)).toFixed(2)),
-        tireSlipRL: Number((0.02 + (throttle > 80 ? 0.14 : 0.02) + Math.abs(accelX) * 0.06).toFixed(2)),
-        tireSlipRR: Number((0.02 + (throttle > 80 ? 0.14 : 0.02) + Math.abs(accelX) * 0.06).toFixed(2)),
-        suspensionTravelFL: Math.floor(62 - accelY * 18 + accelX * 14),
-        suspensionTravelFR: Math.floor(62 - accelY * 18 - accelX * 14),
-        suspensionTravelRL: Math.floor(68 + accelY * 15 + accelX * 12),
-        suspensionTravelRR: Math.floor(68 + accelY * 15 - accelX * 12),
-      };
-
-      setTelemetry(frame);
-
-      // Track max metrics
-      if (frame.speedKmh > topSpeedKmh) setTopSpeedKmh(frame.speedKmh);
-      if (Math.abs(frame.accelX) > maxLateralG) setMaxLateralG(Math.abs(frame.accelX));
-
-      // Buffer packet history (keep last 300 samples)
-      setPacketHistory(prev => [...prev.slice(-299), frame]);
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [streamSource, isStreaming, selectedTrack, manualDriveMode, topSpeedKmh, maxLateralG]);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Draw Dynamic G-G Diagram on Canvas
   useEffect(() => {
@@ -380,72 +172,102 @@ export function Telemetry() {
     ctx.fillStyle = '#666';
     ctx.font = '9px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('+1.0G (Brake)', centerX, 20);
-    ctx.fillText('-1.0G (Accel)', centerX, height - 10);
-    ctx.fillText('1.5G Left', 35, centerY - 4);
-    ctx.fillText('1.5G Right', width - 35, centerY - 4);
+    ctx.fillText('+1.0G (Frenagem)', centerX, 20);
+    ctx.fillText('-1.0G (Aceleração)', centerX, height - 10);
+    ctx.fillText('1.5G Esq', 35, centerY - 4);
+    ctx.fillText('1.5G Dir', width - 35, centerY - 4);
 
-    // Plot G-G trails (last 40 frames)
-    if (packetHistory.length > 1) {
-      const trail = packetHistory.slice(-40);
+    if (!telemetry) return;
+
+    // Plot G-G trails
+    if (historyBuffer.length > 1) {
+      const trail = historyBuffer.slice(-30);
       for (let i = 0; i < trail.length; i++) {
         const p = trail[i];
         const px = centerX + (p.accelX / 1.8) * radius;
-        const py = centerY - (p.accelY / 1.8) * radius;
-        const alpha = (i / trail.length) * 0.6;
+        const py = centerY - (p.accelZ / 1.8) * radius;
+        const alpha = (i / trail.length) * 0.5;
         ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
     // Current G dot
     const currentX = centerX + (telemetry.accelX / 1.8) * radius;
-    const currentY = centerY - (telemetry.accelY / 1.8) * radius;
+    const currentY = centerY - (telemetry.accelZ / 1.8) * radius;
 
     // Outer glow
     ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
     ctx.beginPath();
-    ctx.arc(currentX, currentY, 8, 0, Math.PI * 2);
+    ctx.arc(currentX, currentY, 9, 0, Math.PI * 2);
     ctx.fill();
 
     // Inner bright dot
     ctx.fillStyle = '#10b981';
     ctx.beginPath();
-    ctx.arc(currentX, currentY, 4, 0, Math.PI * 2);
+    ctx.arc(currentX, currentY, 4.5, 0, Math.PI * 2);
     ctx.fill();
-  }, [telemetry, packetHistory]);
+  }, [telemetry, historyBuffer]);
+
+  const handleResetSession = async () => {
+    try {
+      await fetch('/api/telemetry/reset-session', { method: 'POST' });
+      setHistoryBuffer([]);
+      setSessionStats({
+        topSpeedKmh: 0,
+        maxLateralG: 0,
+        maxBrakingG: 0,
+        maxRpm: 0,
+        activeLaps: 0,
+        bestLapTime: 0,
+        totalPackets: 0
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleExportCsv = () => {
-    if (packetHistory.length === 0) {
-      alert("No telemetry data to export.");
+    if (historyBuffer.length === 0) {
+      alert("Nenhum dado real de telemetria gravado nesta sessão.");
       return;
     }
-    const headers = "Timestamp,SpeedKmh,SpeedMph,RPM,Gear,Throttle,Brake,Steer,BoostPsi,AccelX_LatG,AccelY_LongG,FL_Temp,FR_Temp,RL_Temp,RR_Temp\n";
-    const rows = packetHistory.map(p => 
-      `${p.timestamp},${p.speedKmh},${p.speedMph},${p.rpm},${p.gear},${p.throttle},${p.brake},${p.steer},${p.boostPsi},${p.accelX},${p.accelY},${p.tireTempFL.center},${p.tireTempFR.center},${p.tireTempRL.center},${p.tireTempRR.center}`
+    const headers = "Timestamp,SpeedKmh,SpeedMph,RPM,Gear,Throttle,Brake,Clutch,Handbrake,Steer,BoostPsi,AccelX_LatG,AccelZ_LongG,FL_Temp,FR_Temp,RL_Temp,RR_Temp,FL_Slip,FR_Slip,RL_Slip,RR_Slip\n";
+    const rows = historyBuffer.map(p => 
+      `${p.timestamp},${p.speedKmh},${p.speedMph},${p.rpm},${p.gear},${p.throttle},${p.brake},${p.clutch},${p.handbrake},${p.steer},${p.boostPsi},${p.accelX},${p.accelZ},${p.tireTempFL.center},${p.tireTempFR.center},${p.tireTempRL.center},${p.tireTempRR.center},${p.tireSlipFL},${p.tireSlipFR},${p.tireSlipRL},${p.tireSlipRR}`
     ).join("\n");
 
     const blob = new Blob([headers + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `FH6_Telemetry_Session_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+    a.download = `FH6_Real_Telemetry_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
     a.click();
   };
 
+  const handleSendToAi = () => {
+    navigate('/engineer', {
+      state: {
+        telemetryContext: {
+          sessionStats,
+          latestFrame: telemetry,
+          online: isConnected
+        }
+      }
+    });
+  };
+
   const pythonBridgeCode = `# ============================================================
-# FORZA HORIZON 6 / FH5 / MOTORSPORT UDP DATA-OUT BRIDGE
+# FORZA HORIZON 6 UDP DATA-OUT BRIDGE (DASH PROTOCOL)
 # ============================================================
-# Listens on UDP port 5300 (Forza default) and streams live 
-# 324-byte Dash packets to the AI Engineering Cockpit.
+# Escuta na porta UDP 5300 (padrão Forza) e encaminha
+# pacotes brutos descompactados para o servidor do Cockpit.
 
 import socket
 import struct
-import time
 import requests
-import json
 
 UDP_IP = "0.0.0.0"
 UDP_PORT = 5300
@@ -454,14 +276,12 @@ COCKPIT_ENDPOINT = "http://localhost:3000/api/telemetry/packet"
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
 
-print(f"[+] Forza UDP Receiver listening on port {UDP_PORT}...")
-print(f"[+] Streaming forwarder active -> {COCKPIT_ENDPOINT}")
+print(f"[+] Receptor UDP Forza iniciado em 0.0.0.0:{UDP_PORT}")
+print(f"[+] Encaminhando fluxo de dados para -> {COCKPIT_ENDPOINT}")
 
 while True:
     data, addr = sock.recvfrom(1024)
     if len(data) >= 311:
-        # Unpack Forza Dash telemetry struct
-        # (Format: IsRaceOn, TimestampMS, MaxRpm, IdleRpm, CurrentRpm, AccelX, AccelY, AccelZ, VelX, VelY, VelZ...)
         unpacked = struct.unpack('<iIfffffffffffffffffffffffffffffffff', data[:148])
         rpm = unpacked[4]
         max_rpm = unpacked[2]
@@ -469,14 +289,31 @@ while True:
         speed_ms = (vel_x**2 + vel_y**2 + vel_z**2)**0.5
         speed_kmh = speed_ms * 3.6
 
+        # Dash specific bytes
+        dash_tail = struct.unpack('<fffffffHB4Bsb', data[260:300])
+        boost = dash_tail[0]
+        fuel = dash_tail[1]
+        lap_num = dash_tail[7]
+        throttle = int((dash_tail[9] / 255) * 100)
+        brake = int((dash_tail[10] / 255) * 100)
+        clutch = int((dash_tail[11] / 255) * 100)
+        handbrake = 1 if dash_tail[12] > 0 else 0
+        steer = round(dash_tail[13] / 127.0, 2)
+
         packet = {
             "speedKmh": round(speed_kmh, 1),
-            "speedMph": round(speed_kmh * 0.621371, 1),
             "rpm": int(rpm),
             "maxRpm": int(max_rpm),
-            "accelX": round(unpacked[5], 2),
-            "accelY": round(unpacked[6], 2),
-            "accelZ": round(unpacked[7], 2)
+            "throttle": throttle,
+            "brake": brake,
+            "clutch": clutch,
+            "handbrake": handbrake,
+            "steer": steer,
+            "boostPsi": round(boost, 1),
+            "fuel": round(fuel * 100, 1),
+            "accelX": round(unpacked[5] / 9.80665, 2),
+            "accelZ": round(unpacked[7] / 9.80665, 2),
+            "lapNumber": lap_num
         }
 
         try:
@@ -491,72 +328,55 @@ while True:
       <header className="border-b border-[#222] p-6 sm:p-8 bg-gradient-to-b from-[#141414] to-[#0a0a0a] shrink-0">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-[#10b981] font-bold mb-1 flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5" />
-              <span>High-Frequency Data Out Suite • 60 Hz Telemetry Engine</span>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-bold mb-1 flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-[#ef4444]" />
+              <span>Forza Horizon 6 Data-Out • Pipeline de Telemetria Real</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black italic tracking-tighter text-white uppercase">
-              Live Vehicle Telemetry
+              Telemetria ao Vivo
             </h1>
           </div>
 
-          {/* Source Selectors & Controls */}
+          {/* Action Controls */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Stream Mode Toggle */}
-            <div className="bg-[#141414] border border-[#262626] p-1 flex">
-              <button
-                onClick={() => setStreamSource('simulator')}
-                className={`px-3 py-1.5 text-xs font-bold uppercase transition-colors ${
-                  streamSource === 'simulator' 
-                    ? 'bg-[#10b981] text-black' 
-                    : 'text-[#888] hover:text-white'
-                }`}
-              >
-                Track Simulator
-              </button>
-              <button
-                onClick={() => setStreamSource('live_udp')}
-                className={`px-3 py-1.5 text-xs font-bold uppercase transition-colors ${
-                  streamSource === 'live_udp' 
-                    ? 'bg-[#3b82f6] text-white' 
-                    : 'text-[#888] hover:text-white'
-                }`}
-              >
-                Forza UDP Receiver
-              </button>
+            {/* Live Indicator */}
+            <div className={`px-3 py-1.5 border text-xs font-bold uppercase flex items-center gap-2 ${
+              isConnected 
+                ? 'bg-[#10b981]/10 border-[#10b981]/40 text-[#10b981]' 
+                : 'bg-[#ef4444]/10 border-[#ef4444]/40 text-[#ef4444]'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-[#10b981] animate-ping' : 'bg-[#ef4444]'}`}></span>
+              <span>{isConnected ? `ONLINE (${frequencyHz} HZ)` : 'OFFLINE'}</span>
             </div>
 
             <button
-              onClick={() => setIsStreaming(!isStreaming)}
-              className={`px-5 py-2 text-xs font-black uppercase tracking-wider transition-colors inline-flex items-center gap-2 ${
-                isStreaming
-                  ? 'bg-[#ef4444] text-white hover:bg-white hover:text-black'
-                  : 'bg-[#10b981] text-black hover:bg-white'
-              }`}
+              onClick={handleResetSession}
+              className="px-3 py-2 bg-[#161616] border border-[#333] text-[#aaa] hover:text-white text-xs font-bold uppercase hover:bg-[#222] transition-colors inline-flex items-center gap-1.5"
+              title="Zerar estatísticas e buffer da sessão"
             >
-              {isStreaming ? (
-                <>
-                  <Square className="w-3.5 h-3.5 fill-current" /> Pause Feed
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5 fill-current" /> Resume Feed
-                </>
-              )}
+              <RotateCcw className="w-3.5 h-3.5" /> Zerar Sessão
             </button>
 
             <button
               onClick={handleExportCsv}
-              className="px-4 py-2 bg-[#161616] border border-[#333] text-white text-xs font-bold uppercase hover:bg-[#222] transition-colors inline-flex items-center gap-1.5"
-              title="Export session packet data to CSV"
+              disabled={historyBuffer.length === 0}
+              className="px-4 py-2 bg-[#161616] border border-[#333] text-white text-xs font-bold uppercase hover:bg-[#222] disabled:opacity-40 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1.5"
+              title="Exportar log de pacotes reais para CSV"
             >
-              <Download className="w-3.5 h-3.5" /> CSV Log
+              <Download className="w-3.5 h-3.5" /> Exportar CSV
+            </button>
+
+            <button
+              onClick={handleSendToAi}
+              className="px-4 py-2 bg-[#ef4444] text-black font-black text-xs uppercase hover:bg-white transition-colors inline-flex items-center gap-1.5"
+            >
+              <Cpu className="w-3.5 h-3.5" /> Enviar para IA
             </button>
 
             <button
               onClick={() => setShowBridgeModal(true)}
               className="p-2 bg-[#161616] border border-[#333] text-[#aaa] hover:text-white transition-colors"
-              title="Forza Data Out Bridge Setup"
+              title="Instruções de Configuração do Forza UDP Data Out"
             >
               <Terminal className="w-4 h-4" />
             </button>
@@ -564,377 +384,426 @@ while True:
         </div>
       </header>
 
-      {/* Main Dashboard Body */}
+      {/* Main Container */}
       <div className="p-6 sm:p-8 max-w-7xl mx-auto w-full space-y-6 flex-1">
-        {/* Status & Live Track Bar */}
-        <div className="bg-[#0e0e0e] border border-[#222] p-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className={`w-3 h-3 rounded-full ${
-              isStreaming && (streamSource === 'simulator' || liveUdpConnected)
-                ? 'bg-[#10b981] animate-pulse'
-                : 'bg-[#ef4444]'
-            }`}></span>
-            <div>
-              <div className="text-xs font-bold text-white uppercase flex items-center gap-2">
-                <span>
-                  {streamSource === 'simulator'
-                    ? (manualDriveMode ? 'INTERACTIVE MANUAL TEST DRIVE' : 'TRACK TELEMETRY FEED ACTIVE')
-                    : (liveUdpConnected ? 'FORZA LIVE UDP BROADCAST CONNECTED' : 'AWAITING FORZA UDP PACKETS (PORT 5300)')
-                  }
-                </span>
-                <span className="text-[9px] bg-[#1a1a1a] text-[#10b981] border border-[#222] px-2 py-0.2">
-                  60 HZ
-                </span>
+        {/* Offline Warning State Banner */}
+        {!isConnected && (
+          <div className="bg-[#120808] border-2 border-[#ef4444]/40 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <WifiOff className="w-6 h-6 text-[#ef4444]" />
+                <h2 className="text-lg font-black text-white uppercase tracking-tight">
+                  Status do Link de Telemetria: OFFLINE
+                </h2>
               </div>
-              <div className="text-[10px] text-[#666]">
-                Captured Packets: <span className="text-white font-bold">{packetCount.toLocaleString()}</span> • Latency: 16.6ms • Protocol: FH Dash (324B)
+              <p className="text-xs text-[#aaa] leading-relaxed max-w-2xl">
+                Nenhum fluxo de dados do <strong className="text-white">Forza Horizon 6</strong> detectado na porta UDP <strong className="text-white">5300</strong>.
+                Para receber dados em tempo real, inicie o jogo e ative o <span className="text-[#10b981]">Data Out</span> nas configurações de HUD.
+              </p>
+              <div className="text-[11px] text-[#777] flex flex-wrap gap-4 pt-1">
+                <span>• Protocolo: <strong className="text-[#bbb]">UDP Data Out (Dash 324B)</strong></span>
+                <span>• Porta Padrão: <strong className="text-[#bbb]">5300</strong></span>
+                <span>• Pacotes Capturados na Sessão: <strong className="text-[#bbb]">{packetCount}</strong></span>
               </div>
             </div>
-          </div>
 
-          {/* Track selector / Manual Driving toggle */}
-          {streamSource === 'simulator' && (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               <button
-                onClick={() => setManualDriveMode(!manualDriveMode)}
-                className={`px-3 py-1.5 text-[10px] font-bold uppercase transition-colors border flex items-center gap-1.5 ${
-                  manualDriveMode
-                    ? 'bg-[#ef4444] text-black border-[#ef4444]'
-                    : 'bg-[#141414] text-[#888] hover:text-white border-[#262626]'
-                }`}
+                onClick={() => setShowBridgeModal(true)}
+                className="px-5 py-2.5 bg-[#ef4444] text-black font-black text-xs uppercase hover:bg-white transition-colors flex items-center gap-2"
               >
-                <Keyboard className="w-3 h-3" />
-                {manualDriveMode ? 'Manual Controls: ON (WASD / Arrows)' : 'Manual Controls: OFF'}
+                <Terminal className="w-3.5 h-3.5" /> Guia de Conexão UDP
               </button>
+            </div>
+          </div>
+        )}
 
-              {!manualDriveMode && (
-                <select
-                  value={selectedTrack}
-                  onChange={e => setSelectedTrack(e.target.value)}
-                  className="bg-[#141414] border border-[#262626] text-[10px] text-white uppercase px-3 py-1.5 focus:outline-none"
+        {/* Live Gauges Section */}
+        {isConnected && telemetry ? (
+          <>
+            {/* Primary Gauges Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Velocity */}
+              <div className="p-5 bg-[#0e0e0e] border border-[#222]">
+                <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Velocidade Atual</span>
+                <div className="text-4xl font-black text-white italic tracking-tighter">
+                  {telemetry.speedKmh} <span className="text-xs text-[#666] font-normal not-italic">KM/H</span>
+                </div>
+                <div className="text-xs text-[#888] mt-1 flex justify-between">
+                  <span>{telemetry.speedMph} MPH</span>
+                  <span className="text-[#10b981] font-bold">Máx: {sessionStats.topSpeedKmh} KM/H</span>
+                </div>
+              </div>
+
+              {/* Engine RPM & Dyno */}
+              <div className="p-5 bg-[#0e0e0e] border border-[#222]">
+                <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Giro do Motor</span>
+                <div className="text-4xl font-black text-[#ef4444] italic tracking-tighter">
+                  {telemetry.rpm} <span className="text-xs text-[#666] font-normal not-italic">RPM</span>
+                </div>
+                <div className="w-full bg-[#1c1c1c] h-2 mt-2 overflow-hidden relative">
+                  <div 
+                    className={`h-full transition-all duration-75 ${
+                      telemetry.rpm > (telemetry.maxRpm * 0.9) ? 'bg-[#ef4444]' : 'bg-[#eab308]'
+                    }`}
+                    style={{ width: `${Math.min(100, (telemetry.rpm / (telemetry.maxRpm || 8500)) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Gear & Drivetrain Load */}
+              <div className="p-5 bg-[#0e0e0e] border border-[#222]">
+                <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Câmbio & Marcha</span>
+                <div className="text-4xl font-black text-white italic tracking-tighter flex items-baseline gap-2">
+                  <span>MARCHA {telemetry.gear}</span>
+                </div>
+                <div className="text-xs text-[#888] mt-1 flex justify-between">
+                  <span>Boost: {telemetry.boostPsi} PSI</span>
+                  <span className="text-[#3b82f6] font-bold">{telemetry.powerHp} HP</span>
+                </div>
+              </div>
+
+              {/* G-Force Instantaneous */}
+              <div className="p-5 bg-[#0e0e0e] border border-[#222]">
+                <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Aceleração Lateral</span>
+                <div className="text-4xl font-black text-[#10b981] italic tracking-tighter">
+                  {telemetry.accelX} <span className="text-xs text-[#666] font-normal not-italic">G</span>
+                </div>
+                <div className="text-xs text-[#888] mt-1 flex justify-between">
+                  <span>Long: {telemetry.accelZ}G</span>
+                  <span className="text-[#eab308] font-bold">Pico Lat: {sessionStats.maxLateralG}G</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mid Section: Friction Circle (G-G) + 4-Corner Tire Dynamics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Friction Circle (G-G Diagram) */}
+              <div className="bg-[#0e0e0e] border border-[#222] p-6 flex flex-col items-center justify-between">
+                <div className="w-full flex items-center justify-between pb-3 border-b border-[#1c1c1c] mb-4">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-[#ef4444]" />
+                    Círculo de Aderência G-G (Tempo Real)
+                  </h3>
+                  <span className="text-[10px] text-[#666]">Rastro Real</span>
+                </div>
+
+                <canvas
+                  ref={ggCanvasRef}
+                  width={260}
+                  height={260}
+                  className="bg-[#080808] border border-[#1a1a1a] rounded-full my-2"
+                />
+
+                <div className="w-full grid grid-cols-3 gap-2 mt-4 text-center text-[10px] border-t border-[#1c1c1c] pt-3">
+                  <div>
+                    <span className="text-[#666] block uppercase">Lateral</span>
+                    <span className="text-white font-bold">{telemetry.accelX} G</span>
+                  </div>
+                  <div>
+                    <span className="text-[#666] block uppercase">Longitudinal</span>
+                    <span className="text-white font-bold">{telemetry.accelZ} G</span>
+                  </div>
+                  <div>
+                    <span className="text-[#666] block uppercase">Pico Frenagem</span>
+                    <span className="text-[#ef4444] font-bold">{sessionStats.maxBrakingG} G</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4-Corner Thermal & Pressure Heatmap */}
+              <div className="lg:col-span-2 bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#1c1c1c]">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-[#ef4444] flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-[#ef4444]" />
+                    Gradiente Térmico das 4 Rodas (Medições Reais)
+                  </h3>
+                  <div className="flex items-center gap-3 text-[10px] text-[#666]">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#3b82f6]"></span> Frio &lt;75°C</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#10b981]"></span> Ideal 85-98°C</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#ef4444]"></span> Quente &gt;105°C</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Front Left */}
+                  <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-white uppercase">Dianteiro Esquerdo (FL)</span>
+                      <span className="text-[#10b981] font-bold">{telemetry.tirePressureFL} PSI</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] text-[#777]">
+                        <span>Interno: {telemetry.tireTempFL.inner}°C</span>
+                        <span>Centro: {telemetry.tireTempFL.center}°C</span>
+                        <span>Externo: {telemetry.tireTempFL.outer}°C</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1 h-3">
+                        <div className={`rounded-sm ${telemetry.tireTempFL.inner > 105 ? 'bg-[#ef4444]' : telemetry.tireTempFL.inner < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempFL.center > 105 ? 'bg-[#ef4444]' : telemetry.tireTempFL.center < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempFL.outer > 105 ? 'bg-[#ef4444]' : telemetry.tireTempFL.outer < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
+                      <span className="text-[#888]">Slip Ratio:</span>
+                      <span className="text-white font-bold">{telemetry.tireSlipFL}</span>
+                    </div>
+                  </div>
+
+                  {/* Front Right */}
+                  <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-white uppercase">Dianteiro Direito (FR)</span>
+                      <span className="text-[#10b981] font-bold">{telemetry.tirePressureFR} PSI</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] text-[#777]">
+                        <span>Interno: {telemetry.tireTempFR.inner}°C</span>
+                        <span>Centro: {telemetry.tireTempFR.center}°C</span>
+                        <span>Externo: {telemetry.tireTempFR.outer}°C</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1 h-3">
+                        <div className={`rounded-sm ${telemetry.tireTempFR.inner > 105 ? 'bg-[#ef4444]' : telemetry.tireTempFR.inner < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempFR.center > 105 ? 'bg-[#ef4444]' : telemetry.tireTempFR.center < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempFR.outer > 105 ? 'bg-[#ef4444]' : telemetry.tireTempFR.outer < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
+                      <span className="text-[#888]">Slip Ratio:</span>
+                      <span className="text-white font-bold">{telemetry.tireSlipFR}</span>
+                    </div>
+                  </div>
+
+                  {/* Rear Left */}
+                  <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-white uppercase">Traseiro Esquerdo (RL)</span>
+                      <span className="text-[#10b981] font-bold">{telemetry.tirePressureRL} PSI</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] text-[#777]">
+                        <span>Interno: {telemetry.tireTempRL.inner}°C</span>
+                        <span>Centro: {telemetry.tireTempRL.center}°C</span>
+                        <span>Externo: {telemetry.tireTempRL.outer}°C</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1 h-3">
+                        <div className={`rounded-sm ${telemetry.tireTempRL.inner > 105 ? 'bg-[#ef4444]' : telemetry.tireTempRL.inner < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempRL.center > 105 ? 'bg-[#ef4444]' : telemetry.tireTempRL.center < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempRL.outer > 105 ? 'bg-[#ef4444]' : telemetry.tireTempRL.outer < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
+                      <span className="text-[#888]">Slip Ratio:</span>
+                      <span className="text-white font-bold">{telemetry.tireSlipRL}</span>
+                    </div>
+                  </div>
+
+                  {/* Rear Right */}
+                  <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-white uppercase">Traseiro Direito (RR)</span>
+                      <span className="text-[#10b981] font-bold">{telemetry.tirePressureRR} PSI</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] text-[#777]">
+                        <span>Interno: {telemetry.tireTempRR.inner}°C</span>
+                        <span>Centro: {telemetry.tireTempRR.center}°C</span>
+                        <span>Externo: {telemetry.tireTempRR.outer}°C</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1 h-3">
+                        <div className={`rounded-sm ${telemetry.tireTempRR.inner > 105 ? 'bg-[#ef4444]' : telemetry.tireTempRR.inner < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempRR.center > 105 ? 'bg-[#ef4444]' : telemetry.tireTempRR.center < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                        <div className={`rounded-sm ${telemetry.tireTempRR.outer > 105 ? 'bg-[#ef4444]' : telemetry.tireTempRR.outer < 75 ? 'bg-[#3b82f6]' : 'bg-[#10b981]'}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
+                      <span className="text-[#888]">Slip Ratio:</span>
+                      <span className="text-white font-bold">{telemetry.tireSlipRR}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Lower Section: Real Pedals & Suspension Deflection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Driver Pedals & Inputs */}
+              <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-white pb-3 border-b border-[#1c1c1c]">
+                  Entradas do Piloto (Pedais & Volante)
+                </h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-[#888]">Acelerador (Throttle)</span>
+                      <span className="text-white font-bold">{telemetry.throttle}%</span>
+                    </div>
+                    <div className="w-full bg-[#161616] h-2.5 overflow-hidden">
+                      <div className="bg-[#10b981] h-full transition-all duration-75" style={{ width: `${telemetry.throttle}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-[#888]">Frenagem (Brake)</span>
+                      <span className="text-white font-bold">{telemetry.brake}%</span>
+                    </div>
+                    <div className="w-full bg-[#161616] h-2.5 overflow-hidden">
+                      <div className="bg-[#ef4444] h-full transition-all duration-75" style={{ width: `${telemetry.brake}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-[#888]">Embreagem (Clutch)</span>
+                      <span className="text-white font-bold">{telemetry.clutch}%</span>
+                    </div>
+                    <div className="w-full bg-[#161616] h-2.5 overflow-hidden">
+                      <div className="bg-[#3b82f6] h-full transition-all duration-75" style={{ width: `${telemetry.clutch}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-[#888]">Ângulo de Esterço (Steer)</span>
+                      <span className="text-white font-bold">{telemetry.steer}</span>
+                    </div>
+                    <div className="w-full bg-[#161616] h-2.5 overflow-hidden relative">
+                      <div 
+                        className="bg-[#eab308] h-full absolute transition-all duration-75" 
+                        style={{ 
+                          left: '50%', 
+                          width: `${Math.abs(telemetry.steer) * 50}%`,
+                          transform: telemetry.steer < 0 ? 'translateX(-100%)' : 'none'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Suspension Deflection Bars */}
+              <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-white pb-3 border-b border-[#1c1c1c]">
+                  Curso de Suspensão por Amortecedor
+                </h3>
+
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <div>
+                    <span className="text-[10px] text-[#777] uppercase block mb-1">FL</span>
+                    <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
+                      <div 
+                        className="bg-[#3b82f6] w-full transition-all duration-75"
+                        style={{ height: `${Math.min(100, (telemetry.suspensionTravelFL / 120) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelFL} mm</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-[#777] uppercase block mb-1">FR</span>
+                    <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
+                      <div 
+                        className="bg-[#3b82f6] w-full transition-all duration-75"
+                        style={{ height: `${Math.min(100, (telemetry.suspensionTravelFR / 120) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelFR} mm</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-[#777] uppercase block mb-1">RL</span>
+                    <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
+                      <div 
+                        className="bg-[#10b981] w-full transition-all duration-75"
+                        style={{ height: `${Math.min(100, (telemetry.suspensionTravelRL / 120) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelRL} mm</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-[#777] uppercase block mb-1">RR</span>
+                    <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
+                      <div 
+                        className="bg-[#10b981] w-full transition-all duration-75"
+                        style={{ height: `${Math.min(100, (telemetry.suspensionTravelRR / 120) * 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelRR} mm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Detailed Setup & Diagnostics Section when OFFLINE */
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 bg-[#0e0e0e] border border-[#222] p-6 sm:p-8 space-y-6">
+              <h3 className="text-sm font-black uppercase text-white tracking-wider flex items-center gap-2 border-b border-[#1c1c1c] pb-3">
+                <HelpCircle className="w-4 h-4 text-[#ef4444]" />
+                Como Ativar a Telemetria Real no Forza Horizon 6
+              </h3>
+
+              <div className="space-y-4 text-xs text-[#bbb] leading-relaxed">
+                <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-2">
+                  <div className="font-bold text-white uppercase text-[11px]">Passo 1: No Menu do Forza Horizon</div>
+                  <p className="text-[#888]">
+                    Abra o jogo &gt; <strong>Configurações</strong> &gt; <strong>HUD e Jogabilidade</strong> &gt; Role até a seção <strong>Saída de Dados (Data Out)</strong>.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-2">
+                  <div className="font-bold text-white uppercase text-[11px]">Passo 2: Preencha os Campos Exatos</div>
+                  <ul className="space-y-1.5 text-[#aaa]">
+                    <li>• <span className="text-white font-bold">Saída de Dados (Data Out):</span> <span className="text-[#10b981] font-bold">LIGADO</span></li>
+                    <li>• <span className="text-white font-bold">Endereço IP de Saída de Dados:</span> <span className="text-[#10b981] font-bold">127.0.0.1</span> (ou IP local da sua máquina)</li>
+                    <li>• <span className="text-white font-bold">Porta IP de Saída de Dados:</span> <span className="text-[#10b981] font-bold">5300</span></li>
+                    <li>• <span className="text-white font-bold">Formato de Estrutura de Pacote:</span> <span className="text-[#10b981] font-bold">Dash</span></li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-2">
+                  <div className="font-bold text-white uppercase text-[11px]">Passo 3: Conexão Direta e Ponte Python</div>
+                  <p className="text-[#888]">
+                    Assim que você começar a pilotar no Forza Horizon 6, o fluxo UDP transmitirá 60 pacotes por segundo para o Cockpit.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Helper Box */}
+            <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4 flex flex-col justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">
+                  Script de Ponte UDP
+                </h4>
+                <p className="text-xs text-[#777] leading-relaxed mb-4">
+                  Se você joga no Xbox ou em outro PC na mesma rede local, execute o script em Python para encaminhar o fluxo de pacotes sem bloqueios de firewall.
+                </p>
+                <button
+                  onClick={() => setShowBridgeModal(true)}
+                  className="w-full py-2.5 bg-[#161616] border border-[#333] text-white hover:bg-[#222] text-xs font-bold uppercase transition-colors flex items-center justify-center gap-2"
                 >
-                  {TRACK_PROFILES.map(t => (
-                    <option key={t.id} value={t.id}>{t.name} ({t.type})</option>
-                  ))}
-                </select>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Primary Gauges Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {/* Velocity */}
-          <div className="p-5 bg-[#0e0e0e] border border-[#222]">
-            <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Velocity</span>
-            <div className="text-4xl font-black text-white italic tracking-tighter">
-              {telemetry.speedKmh} <span className="text-xs text-[#666] font-normal not-italic">KM/H</span>
-            </div>
-            <div className="text-xs text-[#888] mt-1 flex justify-between">
-              <span>{telemetry.speedMph} MPH</span>
-              <span className="text-[#10b981] font-bold">Top: {topSpeedKmh} KM/H</span>
-            </div>
-          </div>
-
-          {/* Engine RPM & Dyno */}
-          <div className="p-5 bg-[#0e0e0e] border border-[#222]">
-            <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Engine Revs</span>
-            <div className="text-4xl font-black text-[#ef4444] italic tracking-tighter">
-              {telemetry.rpm} <span className="text-xs text-[#666] font-normal not-italic">RPM</span>
-            </div>
-            <div className="w-full bg-[#1c1c1c] h-2 mt-2 overflow-hidden relative">
-              <div 
-                className={`h-full transition-all duration-75 ${
-                  telemetry.rpm > 7800 ? 'bg-[#ef4444]' : 'bg-[#eab308]'
-                }`}
-                style={{ width: `${(telemetry.rpm / telemetry.maxRpm) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Gear & Drivetrain Load */}
-          <div className="p-5 bg-[#0e0e0e] border border-[#222]">
-            <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Transmission</span>
-            <div className="text-4xl font-black text-white italic tracking-tighter flex items-baseline gap-2">
-              <span>GEAR {telemetry.gear}</span>
-            </div>
-            <div className="text-xs text-[#888] mt-1 flex justify-between">
-              <span>Boost: {telemetry.boostPsi} PSI</span>
-              <span className="text-[#3b82f6] font-bold">{telemetry.powerHp} HP</span>
-            </div>
-          </div>
-
-          {/* G-Force Instantaneous */}
-          <div className="p-5 bg-[#0e0e0e] border border-[#222]">
-            <span className="text-[9px] uppercase tracking-widest text-[#666] block mb-1">Lateral Acceleration</span>
-            <div className="text-4xl font-black text-[#10b981] italic tracking-tighter">
-              {telemetry.accelX} <span className="text-xs text-[#666] font-normal not-italic">G</span>
-            </div>
-            <div className="text-xs text-[#888] mt-1 flex justify-between">
-              <span>Long: {telemetry.accelY}G</span>
-              <span className="text-[#eab308] font-bold">Peak: {maxLateralG}G</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Mid Section: Friction Circle (G-G) + 4-Corner Tire Dynamics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Friction Circle (G-G Diagram) */}
-          <div className="bg-[#0e0e0e] border border-[#222] p-6 flex flex-col items-center justify-between">
-            <div className="w-full flex items-center justify-between pb-3 border-b border-[#1c1c1c] mb-4">
-              <h3 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
-                <Compass className="w-4 h-4 text-[#ef4444]" />
-                G-G Friction Boundary Circle
-              </h3>
-              <span className="text-[10px] text-[#666]">Load Trail (40f)</span>
-            </div>
-
-            <canvas
-              ref={ggCanvasRef}
-              width={260}
-              height={260}
-              className="bg-[#080808] border border-[#1a1a1a] rounded-full my-2"
-            />
-
-            <div className="w-full grid grid-cols-3 gap-2 mt-4 text-center text-[10px] border-t border-[#1c1c1c] pt-3">
-              <div>
-                <span className="text-[#666] block uppercase">Lat Load</span>
-                <span className="text-white font-bold">{telemetry.accelX} G</span>
+                  <Terminal className="w-3.5 h-3.5" /> Ver Código Python
+                </button>
               </div>
-              <div>
-                <span className="text-[#666] block uppercase">Long Load</span>
-                <span className="text-white font-bold">{telemetry.accelY} G</span>
-              </div>
-              <div>
-                <span className="text-[#666] block uppercase">Apex Limit</span>
-                <span className="text-[#10b981] font-bold">1.50 G</span>
+
+              <div className="p-3 bg-[#080808] border border-[#1a1a1a] text-[10px] text-[#666]">
+                Status do Socket do Servidor: <span className="text-[#10b981] font-bold">0.0.0.0:5300 (UDP Ativo)</span>
               </div>
             </div>
           </div>
-
-          {/* 4-Corner Thermal & Pressure Heatmap */}
-          <div className="lg:col-span-2 bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#1c1c1c]">
-              <h3 className="text-xs font-black uppercase tracking-wider text-[#ef4444] flex items-center gap-2">
-                <Flame className="w-4 h-4 text-[#ef4444]" />
-                4-Corner Thermal Gradient & Tire Dynamics
-              </h3>
-              <div className="flex items-center gap-3 text-[10px] text-[#666]">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#3b82f6]"></span> Cold &lt;75°C</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#10b981]"></span> Optimal 85-98°C</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#ef4444]"></span> Hot &gt;105°C</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Front Left */}
-              <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-white uppercase">Front Left (FL)</span>
-                  <span className="text-[#10b981] font-bold">{telemetry.tirePressureFL} PSI</span>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-[#777]">
-                    <span>Inner: {telemetry.tireTempFL.inner}°C</span>
-                    <span>Center: {telemetry.tireTempFL.center}°C</span>
-                    <span>Outer: {telemetry.tireTempFL.outer}°C</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 h-3">
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#eab308] rounded-sm"></div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
-                  <span className="text-[#888]">Slip Ratio:</span>
-                  <span className="text-white font-bold">{telemetry.tireSlipFL}</span>
-                </div>
-              </div>
-
-              {/* Front Right */}
-              <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-white uppercase">Front Right (FR)</span>
-                  <span className="text-[#10b981] font-bold">{telemetry.tirePressureFR} PSI</span>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-[#777]">
-                    <span>Inner: {telemetry.tireTempFR.inner}°C</span>
-                    <span>Center: {telemetry.tireTempFR.center}°C</span>
-                    <span>Outer: {telemetry.tireTempFR.outer}°C</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 h-3">
-                    <div className="bg-[#eab308] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
-                  <span className="text-[#888]">Slip Ratio:</span>
-                  <span className="text-white font-bold">{telemetry.tireSlipFR}</span>
-                </div>
-              </div>
-
-              {/* Rear Left */}
-              <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-white uppercase">Rear Left (RL)</span>
-                  <span className="text-[#10b981] font-bold">{telemetry.tirePressureRL} PSI</span>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-[#777]">
-                    <span>Inner: {telemetry.tireTempRL.inner}°C</span>
-                    <span>Center: {telemetry.tireTempRL.center}°C</span>
-                    <span>Outer: {telemetry.tireTempRL.outer}°C</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 h-3">
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
-                  <span className="text-[#888]">Slip Ratio:</span>
-                  <span className="text-white font-bold">{telemetry.tireSlipRL}</span>
-                </div>
-              </div>
-
-              {/* Rear Right */}
-              <div className="p-4 bg-[#080808] border border-[#1a1a1a] space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-white uppercase">Rear Right (RR)</span>
-                  <span className="text-[#10b981] font-bold">{telemetry.tirePressureRR} PSI</span>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-[#777]">
-                    <span>Inner: {telemetry.tireTempRR.inner}°C</span>
-                    <span>Center: {telemetry.tireTempRR.center}°C</span>
-                    <span>Outer: {telemetry.tireTempRR.outer}°C</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 h-3">
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                    <div className="bg-[#10b981] rounded-sm"></div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-xs pt-1 border-t border-[#141414]">
-                  <span className="text-[#888]">Slip Ratio:</span>
-                  <span className="text-white font-bold">{telemetry.tireSlipRR}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lower Section: Pedals & Suspension Deflection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Driver Pedals & Inputs */}
-          <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-wider text-white pb-3 border-b border-[#1c1c1c]">
-              Driver Pedal & Steering Inputs
-            </h3>
-
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#888]">Throttle</span>
-                  <span className="text-white font-bold">{telemetry.throttle}%</span>
-                </div>
-                <div className="w-full bg-[#161616] h-2.5 overflow-hidden">
-                  <div className="bg-[#10b981] h-full transition-all duration-75" style={{ width: `${telemetry.throttle}%` }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#888]">Braking Pressure</span>
-                  <span className="text-white font-bold">{telemetry.brake}%</span>
-                </div>
-                <div className="w-full bg-[#161616] h-2.5 overflow-hidden">
-                  <div className="bg-[#ef4444] h-full transition-all duration-75" style={{ width: `${telemetry.brake}%` }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#888]">Steering Angle</span>
-                  <span className="text-white font-bold">{telemetry.steer}</span>
-                </div>
-                <div className="w-full bg-[#161616] h-2.5 overflow-hidden relative">
-                  <div 
-                    className="bg-[#3b82f6] h-full absolute transition-all duration-75" 
-                    style={{ 
-                      left: '50%', 
-                      width: `${Math.abs(telemetry.steer) * 50}%`,
-                      transform: telemetry.steer < 0 ? 'translateX(-100%)' : 'none'
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Suspension Deflection Bars */}
-          <div className="bg-[#0e0e0e] border border-[#222] p-6 space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-wider text-white pb-3 border-b border-[#1c1c1c]">
-              Suspension Travel & Damper Deflection
-            </h3>
-
-            <div className="grid grid-cols-4 gap-3 text-center">
-              <div>
-                <span className="text-[10px] text-[#777] uppercase block mb-1">FL</span>
-                <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
-                  <div 
-                    className="bg-[#3b82f6] w-full transition-all duration-75"
-                    style={{ height: `${(telemetry.suspensionTravelFL / 120) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelFL} mm</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-[#777] uppercase block mb-1">FR</span>
-                <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
-                  <div 
-                    className="bg-[#3b82f6] w-full transition-all duration-75"
-                    style={{ height: `${(telemetry.suspensionTravelFR / 120) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelFR} mm</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-[#777] uppercase block mb-1">RL</span>
-                <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
-                  <div 
-                    className="bg-[#10b981] w-full transition-all duration-75"
-                    style={{ height: `${(telemetry.suspensionTravelRL / 120) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelRL} mm</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-[#777] uppercase block mb-1">RR</span>
-                <div className="h-28 bg-[#161616] w-full flex flex-col justify-end p-1">
-                  <div 
-                    className="bg-[#10b981] w-full transition-all duration-75"
-                    style={{ height: `${(telemetry.suspensionTravelRR / 120) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs font-bold text-white mt-1 block">{telemetry.suspensionTravelRR} mm</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Python UDP Bridge Instructions Modal */}
@@ -943,24 +812,17 @@ while True:
           <div className="bg-[#0e0e0e] border border-[#333] w-full max-w-2xl p-6 sm:p-8 my-8 relative">
             <button 
               onClick={() => setShowBridgeModal(false)}
-              className="absolute right-4 top-4 text-[#666] hover:text-white p-1"
+              className="absolute right-4 top-4 text-[#666] hover:text-white p-1 font-mono"
             >
               ✕
             </button>
 
             <h3 className="text-xl font-black italic text-white uppercase mb-2">
-              Forza Horizon UDP Data Out Setup
+              Script de Ponte UDP do Forza Horizon 6
             </h3>
             <p className="text-xs text-[#777] mb-4 leading-relaxed">
-              To stream real-time physics data from Forza Horizon (PC or Xbox) directly into this engineering cockpit, enable Data Out in game and run the Python receiver bridge below:
+              Copie o código Python abaixo para receber os pacotes do Forza e transmiti-los diretamente para a API do Cockpit:
             </p>
-
-            <div className="space-y-3 mb-5 p-4 bg-[#080808] border border-[#1a1a1a] text-xs text-[#aaa]">
-              <div>1. In Forza Horizon: Go to <span className="text-white font-bold">Settings &gt; HUD and Gameplay &gt; Data Out = ON</span></div>
-              <div>2. Set <span className="text-[#10b981] font-bold">Data Out IP Address</span> = <span className="text-white">127.0.0.1</span> (or your local IP)</div>
-              <div>3. Set <span className="text-[#10b981] font-bold">Data Out IP Port</span> = <span className="text-white">5300</span></div>
-              <div>4. Set <span className="text-[#10b981] font-bold">Data Out Packet Format</span> = <span className="text-white">Dash</span></div>
-            </div>
 
             <div className="relative">
               <div className="flex justify-between items-center bg-[#141414] px-4 py-2 border-t border-x border-[#262626]">
@@ -974,10 +836,10 @@ while True:
                   className="text-[10px] text-[#ef4444] hover:text-white inline-flex items-center gap-1 font-bold"
                 >
                   {copiedScript ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                  {copiedScript ? 'Copied to Clipboard!' : 'Copy Python Script'}
+                  {copiedScript ? 'Copiado para a Área de Transferência!' : 'Copiar Script Python'}
                 </button>
               </div>
-              <pre className="p-4 bg-[#050505] border border-[#262626] text-[10px] text-[#10b981] overflow-x-auto max-h-60">
+              <pre className="p-4 bg-[#050505] border border-[#262626] text-[10px] text-[#10b981] overflow-x-auto max-h-64">
                 {pythonBridgeCode}
               </pre>
             </div>
@@ -987,7 +849,7 @@ while True:
                 onClick={() => setShowBridgeModal(false)}
                 className="px-5 py-2 bg-[#ef4444] text-black font-bold text-xs uppercase hover:bg-white transition-colors"
               >
-                Close Setup
+                Fechar
               </button>
             </div>
           </div>

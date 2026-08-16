@@ -25,7 +25,7 @@ export function RaceRadioHUD() {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'model'; text: string }>>([
     {
       role: 'model',
-      text: '📻 Pit Wall Race Radio online. Standing by for telemetry queries, setup adjustments, and live mechanical advice.'
+      text: '📻 Rádio do Pit Wall online. Pronto para consultas de telemetria, acerto de suspensão, diferencial e recomendações mecânicas.'
     }
   ]);
   const [input, setInput] = useState('');
@@ -54,6 +54,7 @@ export function RaceRadioHUD() {
       // Filter out markdown/codeblocks for cleaner audio
       const cleanText = text.replace(/```[\s\S]*?```/g, '').replace(/[#*_`]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'pt-BR';
       utterance.rate = 1.05;
       utterance.pitch = 0.95;
       window.speechSynthesis.speak(utterance);
@@ -114,14 +115,14 @@ export function RaceRadioHUD() {
       });
 
       const data = await response.json().catch(() => ({ text: '' }));
-      const modelText = data.text || 'Engineer copy. Telemetry received.';
+      const modelText = data.text || 'Engenheiro copiou. Telemetria recebida.';
       setMessages(prev => [...prev, { role: 'model', text: modelText }]);
       speakText(modelText);
     } catch (e) {
       console.error(e);
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: '📻 Pit Wall: Radio static / signal lost. Check telemetry connection.' 
+        text: '📻 Pit Wall: Estática no rádio / sinal interrompido. Verifique o link de telemetria.' 
       }]);
     } finally {
       setLoading(false);
@@ -140,8 +141,8 @@ export function RaceRadioHUD() {
             <Radio className="w-4 h-4 text-[#ef4444] animate-pulse" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#ef4444] rounded-full animate-ping"></span>
           </div>
-          <span className="text-xs font-black italic tracking-wider uppercase">Race Radio</span>
-          <span className="text-[10px] px-1.5 py-0.5 bg-[#ef4444] text-black font-bold uppercase">AI</span>
+          <span className="text-xs font-black italic tracking-wider uppercase">Rádio do Pit</span>
+          <span className="text-[10px] px-1.5 py-0.5 bg-[#ef4444] text-black font-bold uppercase">IA</span>
         </button>
       )}
 
@@ -153,8 +154,8 @@ export function RaceRadioHUD() {
             <div className="flex items-center gap-2">
               <Radio className="w-4 h-4 text-[#ef4444] animate-pulse" />
               <div>
-                <div className="text-[9px] uppercase tracking-widest text-[#ef4444] font-bold">Pit Wall Radio</div>
-                <div className="text-xs font-black italic text-white leading-none uppercase">Race Engineer Core</div>
+                <div className="text-[9px] uppercase tracking-widest text-[#ef4444] font-bold">Rádio do Pit Wall</div>
+                <div className="text-xs font-black italic text-white leading-none uppercase">Engenheiro FH6</div>
               </div>
             </div>
 
@@ -162,7 +163,7 @@ export function RaceRadioHUD() {
               <button
                 onClick={() => setVoiceEnabled(!voiceEnabled)}
                 className={`p-1.5 border text-xs ${voiceEnabled ? 'bg-[#ef4444] text-black border-[#ef4444]' : 'bg-[#181818] text-[#888] border-[#333] hover:text-white'}`}
-                title={voiceEnabled ? 'Voice Readout Active' : 'Enable Voice Readout'}
+                title={voiceEnabled ? 'Voz Ativada' : 'Ativar Síntese de Voz'}
               >
                 {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
               </button>
@@ -171,7 +172,7 @@ export function RaceRadioHUD() {
                 to="/engineer"
                 onClick={() => setIsOpen(false)}
                 className="p-1.5 bg-[#181818] hover:bg-[#252525] border border-[#333] text-[#888] hover:text-white"
-                title="Open Full AI Engineer Console"
+                title="Abrir Console Completo do Engenheiro IA"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
               </Link>
@@ -179,7 +180,7 @@ export function RaceRadioHUD() {
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-1.5 bg-[#181818] hover:bg-[#ef4444] hover:text-black border border-[#333] text-[#888]"
-                title="Close"
+                title="Fechar"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -188,13 +189,13 @@ export function RaceRadioHUD() {
 
           {/* Vehicle Context Selector */}
           <div className="px-3 py-1.5 bg-[#080808] border-b border-[#1f1f1f] flex items-center justify-between text-[10px]">
-            <span className="text-[#666] uppercase">Channel:</span>
+            <span className="text-[#666] uppercase">Canal / Carro:</span>
             <select
               value={selectedCarId}
               onChange={e => setSelectedCarId(e.target.value)}
               className="bg-[#141414] border border-[#2a2a2a] text-white px-2 py-0.5 uppercase text-[10px] focus:outline-none"
             >
-              <option value="GLOBAL">All Cars / Global</option>
+              <option value="GLOBAL">Todos os Carros / Geral</option>
               {cars.map(c => (
                 <option key={c.id} value={c.id}>
                   {c.brand} {c.model} ({c.carClass}{c.pi})
@@ -223,7 +224,7 @@ export function RaceRadioHUD() {
             {loading && (
               <div className="flex items-center gap-2 p-2.5 bg-[#151515] border-l-2 border-[#ef4444] text-[10px] text-[#888]">
                 <Loader2 className="w-3 h-3 animate-spin text-[#ef4444]" />
-                <span>Computing telemetry delta & differential lock...</span>
+                <span>Calculando dinâmica de chassi e diferencial...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -232,10 +233,10 @@ export function RaceRadioHUD() {
           {/* Quick Radio Preset Buttons */}
           <div className="p-1.5 bg-[#0e0e0e] border-t border-[#1a1a1a] flex gap-1.5 overflow-x-auto scrollbar-none">
             {[
-              'Understeer fix',
-              'Diff lock setting',
-              'Tire cold PSI',
-              'A800 upgrade tips'
+              'Corrigir Understeer',
+              'Ajuste de Diferencial',
+              'Pressão fria de pneus',
+              'Upgrades para Classe A800'
             ].map((preset, i) => (
               <button
                 key={i}
@@ -259,7 +260,7 @@ export function RaceRadioHUD() {
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Ask Race Engineer..."
+              placeholder="Falar com o Engenheiro..."
               className="flex-1 bg-[#181818] border border-[#2e2e2e] px-2.5 py-1.5 text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#ef4444]"
             />
             <button

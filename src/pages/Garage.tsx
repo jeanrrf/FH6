@@ -302,14 +302,14 @@ export function Garage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-bold mb-1 flex items-center gap-2">
-              <span>Forza Franchise Database</span>
+              <span>Banco de Dados Forza</span>
               <span>•</span>
-              <span>{CAR_CATALOG.length} Authentic Vehicles</span>
+              <span>{CAR_CATALOG.length} Veículos Autênticos</span>
               <span>•</span>
-              <span className="text-[#10b981] font-bold">{cars.length} Cars in Fleet</span>
+              <span className="text-[#10b981] font-bold">{cars.length} Carros na Frota</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black italic tracking-tighter text-white uppercase">
-              Garage & Market Valuation
+              Garagem & Avaliação de Mercado
             </h1>
           </div>
 
@@ -318,7 +318,7 @@ export function Garage() {
             <div className="px-4 py-2 bg-[#0e0e0e] border border-[#222] flex items-center gap-3">
               <Coins className="w-4 h-4 text-[#eab308]" />
               <div>
-                <div className="text-[9px] text-[#666] uppercase">Fleet Value</div>
+                <div className="text-[9px] text-[#666] uppercase">Valor da Frota</div>
                 <div className="text-sm font-black text-white">{formatCr(totalFleetValue)}</div>
               </div>
             </div>
@@ -326,8 +326,8 @@ export function Garage() {
             <div className="px-4 py-2 bg-[#0e0e0e] border border-[#222] flex items-center gap-3">
               <Eye className="w-4 h-4 text-[#3b82f6]" />
               <div>
-                <div className="text-[9px] text-[#666] uppercase">Watchlist</div>
-                <div className="text-sm font-black text-white">{watchedCarsCount} Tracked</div>
+                <div className="text-[9px] text-[#666] uppercase">Lista de Desejos</div>
+                <div className="text-sm font-black text-white">{watchedCarsCount} Monitorados</div>
               </div>
             </div>
 
@@ -335,7 +335,7 @@ export function Garage() {
               onClick={() => setShowAddModal(true)}
               className="px-5 py-2.5 bg-[#ef4444] text-black hover:bg-white text-xs font-black uppercase tracking-wider transition-colors inline-flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" /> Add Custom Spec
+              <Plus className="w-4 h-4" /> Adicionar Custom
             </button>
           </div>
         </div>
@@ -351,7 +351,7 @@ export function Garage() {
             }`}
           >
             <CarFront className="w-4 h-4 text-[#ef4444]" />
-            Personal Garage Fleet ({cars.length})
+            Frota Pessoal da Garagem ({cars.length})
           </button>
 
           <button
@@ -363,7 +363,7 @@ export function Garage() {
             }`}
           >
             <Sparkles className="w-4 h-4 text-[#eab308]" />
-            Franchise Catalog & Prices ({CAR_CATALOG.length})
+            Catálogo Geral & Preços ({CAR_CATALOG.length})
           </button>
 
           <button
@@ -375,7 +375,7 @@ export function Garage() {
             }`}
           >
             <Eye className="w-4 h-4 text-[#3b82f6]" />
-            Price Watchlist ({watchedCarsCount})
+            Lista de Desejos / Preços ({watchedCarsCount})
           </button>
         </div>
       </header>
@@ -394,7 +394,7 @@ export function Garage() {
                 <Search className="w-4 h-4 text-[#555] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search garage by brand, model, class..."
+                  placeholder="Buscar na garagem por marca, modelo, classe..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="w-full bg-[#141414] border border-[#262626] pl-9 pr-4 py-2 text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#ef4444]"
@@ -403,7 +403,7 @@ export function Garage() {
 
               {/* Class Filter */}
               <div className="flex items-center gap-1 overflow-x-auto">
-                <span className="text-[10px] text-[#555] uppercase mr-1">Class:</span>
+                <span className="text-[10px] text-[#555] uppercase mr-1">Classe:</span>
                 {['ALL', 'X', 'S2', 'S1', 'A', 'B', 'C', 'D'].map(cls => (
                   <button
                     key={cls}
@@ -414,7 +414,7 @@ export function Garage() {
                         : 'bg-[#141414] text-[#888] hover:text-white border border-[#222]'
                     }`}
                   >
-                    {cls}
+                    {cls === 'ALL' ? 'TODAS' : cls}
                   </button>
                 ))}
               </div>
@@ -425,11 +425,11 @@ export function Garage() {
                 onChange={e => setPriceRange(e.target.value)}
                 className="bg-[#141414] border border-[#262626] text-[10px] text-white uppercase px-2.5 py-1.5 focus:outline-none"
               >
-                <option value="ALL">All Price Tiers</option>
-                <option value="under_50k">&lt; 50k CR (Budget)</option>
-                <option value="50k_200k">50k - 200k CR (Sports)</option>
-                <option value="200k_1m">200k - 1M CR (Supercars)</option>
-                <option value="over_1m">1M+ CR (Hypercars/Legends)</option>
+                <option value="ALL">Todas as Faixas de Preço</option>
+                <option value="under_50k">&lt; 50k CR (Econômico)</option>
+                <option value="50k_200k">50k - 200k CR (Esportivos)</option>
+                <option value="200k_1m">200k - 1M CR (Supercarros)</option>
+                <option value="over_1m">1M+ CR (Hypercars / Lendas)</option>
               </select>
 
               {/* Sort By Dropdown */}
@@ -440,12 +440,12 @@ export function Garage() {
                   onChange={e => setSortBy(e.target.value as any)}
                   className="bg-[#141414] border border-[#262626] text-[10px] text-white uppercase px-2.5 py-1.5 focus:outline-none"
                 >
-                  <option value="pi_desc">Highest PI (Max Performance)</option>
-                  <option value="pi_asc">Lowest PI (Base Tuning)</option>
-                  <option value="price_desc">Price: High to Low (CR)</option>
-                  <option value="price_asc">Price: Low to High (CR)</option>
-                  <option value="power_desc">Highest Power (HP)</option>
-                  <option value="alpha">Alphabetical (Brand)</option>
+                  <option value="pi_desc">Maior PI (Performance Máxima)</option>
+                  <option value="pi_asc">Menor PI (Base Stock)</option>
+                  <option value="price_desc">Preço: Maior para Menor (CR)</option>
+                  <option value="price_asc">Preço: Menor para Maior (CR)</option>
+                  <option value="power_desc">Maior Potência (HP)</option>
+                  <option value="alpha">Ordem Alfabética (Marca)</option>
                 </select>
               </div>
 
@@ -458,7 +458,7 @@ export function Garage() {
                       ? 'bg-[#ef4444]/10 border-[#ef4444] text-[#ef4444]' 
                       : 'bg-[#141414] border-[#262626] text-[#666] hover:text-white'
                   }`}
-                  title="Show Favorites Only"
+                  title="Apenas Favoritos"
                 >
                   <Star className="w-4 h-4 fill-current" />
                 </button>
@@ -490,10 +490,10 @@ export function Garage() {
                 <CarFront className="w-12 h-12 text-[#444] mx-auto mb-2" />
                 <div>
                   <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">
-                    Your Personal Garage is Ready
+                    Sua Garagem Pessoal está Pronta
                   </h3>
                   <p className="text-xs text-[#777] max-w-lg mx-auto">
-                    Import vehicles with official Forza credit prices, power specs, and PI classes directly from the franchise database.
+                    Adicione veículos com preços oficiais em Créditos (CR), ficha técnica de potência e classe de PI diretamente do catálogo Forza.
                   </p>
                 </div>
 
@@ -502,20 +502,20 @@ export function Garage() {
                     onClick={() => setActiveTab('catalog')}
                     className="px-6 py-3 bg-[#ef4444] text-black text-xs font-black uppercase tracking-wider hover:bg-white transition-colors inline-flex items-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4" /> Browse Franchise Catalog ({CAR_CATALOG.length} Cars)
+                    <Sparkles className="w-4 h-4" /> Navegar pelo Catálogo ({CAR_CATALOG.length} Carros)
                   </button>
                   <button
                     onClick={() => handleImportPack('jdm_legends')}
                     className="px-5 py-3 bg-[#161616] border border-[#333] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#222] transition-colors"
                   >
-                    + Import JDM Legends Pack
+                    + Importar Pacote Lendas JDM
                   </button>
                 </div>
               </div>
             ) : filteredGarageCars.length === 0 ? (
               <div className="text-center py-16 border border-[#222] bg-[#0c0c0c]">
                 <p className="text-xs text-[#666] uppercase tracking-widest">
-                  No garage vehicles match search and filter criteria
+                  Nenhum veículo encontrado com os filtros selecionados
                 </p>
               </div>
             ) : viewMode === 'grid' ? (
@@ -558,10 +558,10 @@ export function Garage() {
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-[#ef4444]" />
                   <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                    1-Click Franchise Starter Packs
+                    Pacotes Iniciais Forza em 1 Clique
                   </h3>
                 </div>
-                <span className="text-[10px] text-[#777]">Instant batch import to your fleet</span>
+                <span className="text-[10px] text-[#777]">Importação em lote instantânea para sua frota</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -585,7 +585,7 @@ export function Garage() {
                       ) : (
                         <Plus className="w-3 h-3" />
                       )}
-                      {importingPack === pack.id ? 'Importing Fleet...' : `Import Pack (${pack.count} Cars)`}
+                      {importingPack === pack.id ? 'Importando Frota...' : `Importar Pacote (${pack.count} Carros)`}
                     </button>
                   </div>
                 ))}
@@ -600,7 +600,7 @@ export function Garage() {
                   <Search className="w-4 h-4 text-[#555] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder="Search franchise (e.g. 2JZ, RB26, Flat-6, V12, Supra, Valkyrie)..."
+                    placeholder="Buscar catálogo (ex: 2JZ, RB26, Flat-6, V12, Supra, Valkyrie)..."
                     value={catalogSearch}
                     onChange={e => setCatalogSearch(e.target.value)}
                     className="w-full bg-[#141414] border border-[#262626] pl-9 pr-4 py-2 text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#ef4444]"
@@ -609,7 +609,7 @@ export function Garage() {
 
                 {/* Class Filters */}
                 <div className="flex items-center gap-1 overflow-x-auto">
-                  <span className="text-[10px] text-[#555] uppercase mr-1">Class:</span>
+                  <span className="text-[10px] text-[#555] uppercase mr-1">Classe:</span>
                   {['ALL', 'X', 'S2', 'S1', 'A', 'B', 'C', 'D', 'E'].map(cls => (
                     <button
                       key={cls}
@@ -620,7 +620,7 @@ export function Garage() {
                           : 'bg-[#141414] text-[#888] hover:text-white border border-[#222]'
                       }`}
                     >
-                      {cls}
+                      {cls === 'ALL' ? 'TODAS' : cls}
                     </button>
                   ))}
                 </div>
@@ -631,7 +631,7 @@ export function Garage() {
                   onChange={e => setCatalogPriceRange(e.target.value)}
                   className="bg-[#141414] border border-[#262626] text-[10px] text-white uppercase px-2.5 py-1.5 focus:outline-none"
                 >
-                  <option value="ALL">All Price Tiers</option>
+                  <option value="ALL">Todas as Faixas de Preço</option>
                   <option value="under_50k">&lt; 50k CR</option>
                   <option value="50k_200k">50k - 200k CR</option>
                   <option value="200k_1m">200k - 1M CR</option>
@@ -644,17 +644,17 @@ export function Garage() {
                   onChange={e => setCatalogSortBy(e.target.value as any)}
                   className="bg-[#141414] border border-[#262626] text-[10px] text-white uppercase px-2.5 py-1.5 focus:outline-none"
                 >
-                  <option value="pi_desc">Highest PI</option>
-                  <option value="price_desc">Highest Price (CR)</option>
-                  <option value="price_asc">Lowest Price (CR)</option>
-                  <option value="power_desc">Highest Power (HP)</option>
-                  <option value="alpha">Alphabetical</option>
+                  <option value="pi_desc">Maior PI</option>
+                  <option value="price_desc">Maior Preço (CR)</option>
+                  <option value="price_asc">Menor Preço (CR)</option>
+                  <option value="power_desc">Maior Potência (HP)</option>
+                  <option value="alpha">Ordem Alfabética</option>
                 </select>
               </div>
 
               {/* Category Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-t border-[#1a1a1a] pt-3">
-                <span className="text-[10px] text-[#555] uppercase mr-1 shrink-0">Category:</span>
+                <span className="text-[10px] text-[#555] uppercase mr-1 shrink-0">Categoria:</span>
                 {categories.map(cat => (
                   <button
                     key={cat}
@@ -665,7 +665,7 @@ export function Garage() {
                         : 'bg-[#141414] text-[#777] hover:text-[#ccc] border border-[#222]'
                     }`}
                   >
-                    {cat}
+                    {cat === 'ALL' ? 'TODAS' : cat}
                   </button>
                 ))}
               </div>
@@ -717,7 +717,7 @@ export function Garage() {
                                 ? 'bg-[#3b82f6]/20 border-[#3b82f6] text-[#3b82f6]' 
                                 : 'bg-[#141414] border-[#222] text-[#555] hover:text-white'
                             }`}
-                            title={isWatched ? 'Remove from Watchlist' : 'Add to Price Watchlist'}
+                            title={isWatched ? 'Remover da Lista de Desejos' : 'Adicionar à Lista de Desejos'}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -745,15 +745,15 @@ export function Garage() {
                       {/* Stats Matrix */}
                       <div className="grid grid-cols-3 gap-2 my-4 p-2.5 bg-[#080808] border border-[#1a1a1a]">
                         <div>
-                          <div className="text-[8px] uppercase tracking-widest text-[#555]">Power</div>
+                          <div className="text-[8px] uppercase tracking-widest text-[#555]">Potência</div>
                           <div className="text-xs font-bold text-white">{car.power} HP</div>
                         </div>
                         <div>
-                          <div className="text-[8px] uppercase tracking-widest text-[#555]">Weight</div>
+                          <div className="text-[8px] uppercase tracking-widest text-[#555]">Peso</div>
                           <div className="text-xs font-bold text-white">{car.weight} KG</div>
                         </div>
                         <div>
-                          <div className="text-[8px] uppercase tracking-widest text-[#555]">PWR/WT</div>
+                          <div className="text-[8px] uppercase tracking-widest text-[#555]">HP/TON</div>
                           <div className="text-xs font-bold text-[#10b981]">
                             {(car.power / (car.weight / 1000)).toFixed(0)} HP/T
                           </div>
@@ -766,10 +766,10 @@ export function Garage() {
                       <span className="text-[10px] text-[#777]">
                         {inGarage ? (
                           <span className="text-[#10b981] font-bold flex items-center gap-1">
-                            <Check className="w-3 h-3" /> In Personal Fleet
+                            <Check className="w-3 h-3" /> Na Frota Pessoal
                           </span>
                         ) : (
-                          <span>Autoshow Available</span>
+                          <span>Disponível no Autoshow</span>
                         )}
                       </span>
 
@@ -785,15 +785,15 @@ export function Garage() {
                       >
                         {isJustAdded ? (
                           <>
-                            <Check className="w-3.5 h-3.5" /> Added!
+                            <Check className="w-3.5 h-3.5" /> Adicionado!
                           </>
                         ) : inGarage ? (
                           <>
-                            <Plus className="w-3.5 h-3.5" /> Add Another Spec
+                            <Plus className="w-3.5 h-3.5" /> Adicionar Outro Setup
                           </>
                         ) : (
                           <>
-                            <Plus className="w-3.5 h-3.5" /> Add to Garage
+                            <Plus className="w-3.5 h-3.5" /> Adicionar à Garagem
                           </>
                         )}
                       </button>
@@ -815,14 +815,14 @@ export function Garage() {
                 <div>
                   <h3 className="text-lg font-black italic text-white uppercase tracking-tight flex items-center gap-2">
                     <Eye className="w-5 h-5 text-[#3b82f6]" />
-                    Car Price & Acquisition Watchlist
+                    Lista de Monitoramento de Preços e Aquisições
                   </h3>
                   <p className="text-xs text-[#777] mt-1">
-                    Monitor market pricing, credit thresholds, and target acquisitions across your garage and the entire Forza franchise catalog.
+                    Acompanhe valores em Créditos (CR), metas de compra e carros monitorados na garagem e no catálogo geral do Forza.
                   </p>
                 </div>
                 <div className="text-xs text-[#aaa]">
-                  Total Watched: <span className="text-[#3b82f6] font-bold">{watchedCarsCount} Vehicles</span>
+                  Total Monitorado: <span className="text-[#3b82f6] font-bold">{watchedCarsCount} Veículos</span>
                 </div>
               </div>
             </div>
@@ -835,7 +835,7 @@ export function Garage() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[9px] bg-[#3b82f6]/20 text-[#3b82f6] border border-[#3b82f6]/40 px-2 py-0.5 uppercase font-bold">
-                        Owned & Monitored
+                        Na Garagem & Monitorado
                       </span>
                       <span className="text-xs font-bold text-[#eab308]">
                         {formatCr(car.priceCr)}
@@ -846,7 +846,7 @@ export function Garage() {
                     <h3 className="text-lg font-black italic text-white uppercase">{car.model}</h3>
 
                     <div className="my-3 p-2 bg-[#080808] border border-[#1a1a1a] flex justify-between text-xs">
-                      <span className="text-[#888]">Class {car.carClass} {car.pi}</span>
+                      <span className="text-[#888]">Classe {car.carClass} {car.pi}</span>
                       <span className="text-[#888]">{car.power} HP</span>
                       <span className="text-[#10b981] font-bold">{car.drivetrain}</span>
                     </div>
@@ -854,13 +854,13 @@ export function Garage() {
 
                   <div className="pt-3 border-t border-[#1a1a1a] flex items-center justify-between">
                     <Link to={`/garage/car/${car.id}`} className="text-xs text-[#ef4444] font-bold flex items-center gap-1">
-                      Open Studio <ArrowRight className="w-3 h-3" />
+                      Abrir Estúdio <ArrowRight className="w-3 h-3" />
                     </Link>
                     <button
                       onClick={(e) => handleToggleWatch(e, car)}
                       className="text-[10px] text-[#777] hover:text-[#ef4444]"
                     >
-                      Unwatch
+                      Remover Alerta
                     </button>
                   </div>
                 </div>
@@ -872,7 +872,7 @@ export function Garage() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[9px] bg-[#eab308]/10 text-[#eab308] border border-[#eab308]/30 px-2 py-0.5 uppercase font-bold">
-                        Target Acquisition
+                        Meta de Aquisição
                       </span>
                       <span className="text-xs font-bold text-[#eab308]">
                         {formatCr(car.priceCr)}
@@ -883,9 +883,9 @@ export function Garage() {
                     <h3 className="text-lg font-black italic text-white uppercase">{car.model}</h3>
 
                     <div className="my-3 p-2 bg-[#080808] border border-[#1a1a1a] flex justify-between text-xs">
-                      <span className="text-[#888]">Class {car.carClass} {car.pi}</span>
+                      <span className="text-[#888]">Classe {car.carClass} {car.pi}</span>
                       <span className="text-[#888]">{car.power} HP</span>
-                      <span className="text-[#3b82f6] font-bold">{car.category || 'Franchise'}</span>
+                      <span className="text-[#3b82f6] font-bold">{car.category || 'Forza'}</span>
                     </div>
                   </div>
 
@@ -894,13 +894,13 @@ export function Garage() {
                       onClick={() => handleAddCatalogCarToGarage(car)}
                       className="px-3 py-1 bg-[#ef4444] text-black text-[10px] font-bold uppercase hover:bg-white transition-colors"
                     >
-                      + Add to Fleet
+                      + Comprar para Garagem
                     </button>
                     <button
                       onClick={() => toggleCatalogWatch(car.model)}
                       className="text-[10px] text-[#777] hover:text-[#ef4444]"
                     >
-                      Unwatch
+                      Remover Alerta
                     </button>
                   </div>
                 </div>
@@ -913,7 +913,7 @@ export function Garage() {
       {/* Add / Edit Modal */}
       {(showAddModal || editingCar) && (
         <CarModal
-          title={editingCar ? 'Edit Vehicle Specifications' : 'Add Vehicle to Garage'}
+          title={editingCar ? 'Editar Especificações do Veículo' : 'Adicionar Veículo à Garagem'}
           initialData={editingCar || undefined}
           onClose={() => {
             setShowAddModal(false);
@@ -985,7 +985,7 @@ function CarCard({
             <button
               onClick={onToggleWatch}
               className={`p-1 transition-colors ${car.isWatched ? 'text-[#3b82f6]' : 'text-[#444] hover:text-white'}`}
-              title="Toggle Price Watchlist"
+              title="Monitorar Preço"
             >
               <Eye className="w-3.5 h-3.5" />
             </button>
@@ -993,7 +993,7 @@ function CarCard({
             <button
               onClick={onToggleFavorite}
               className={`p-1 transition-colors ${car.isFavorite ? 'text-[#ef4444]' : 'text-[#444] hover:text-white'}`}
-              title="Toggle Favorite"
+              title="Favoritar"
             >
               <Star className="w-3.5 h-3.5 fill-current" />
             </button>
@@ -1001,7 +1001,7 @@ function CarCard({
             <button
               onClick={onEdit}
               className="p-1 text-[#444] hover:text-white transition-colors"
-              title="Edit Specs"
+              title="Editar Ficha"
             >
               <Edit3 className="w-3.5 h-3.5" />
             </button>
@@ -1009,7 +1009,7 @@ function CarCard({
             <button
               onClick={onDelete}
               className="p-1 text-[#444] hover:text-[#ef4444] transition-colors"
-              title="Delete"
+              title="Excluir"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -1025,11 +1025,11 @@ function CarCard({
 
         <div className="grid grid-cols-2 gap-3 my-4 p-3 bg-[#080808] border border-[#1a1a1a]">
           <div>
-            <div className="text-[9px] uppercase tracking-widest text-[#555]">Power</div>
+            <div className="text-[9px] uppercase tracking-widest text-[#555]">Potência</div>
             <div className="text-sm font-bold text-white">{car.power} HP</div>
           </div>
           <div>
-            <div className="text-[9px] uppercase tracking-widest text-[#555]">Weight</div>
+            <div className="text-[9px] uppercase tracking-widest text-[#555]">Peso</div>
             <div className="text-sm font-bold text-white">{car.weight} KG</div>
           </div>
         </div>
@@ -1037,10 +1037,10 @@ function CarCard({
 
       <div className="pt-3 border-t border-[#1a1a1a] flex items-center justify-between">
         <span className="text-[10px] text-[#888] uppercase">
-          Status: <span className="text-[#10b981]">{car.status || 'Active'}</span>
+          Status: <span className="text-[#10b981]">{car.status || 'Ativo'}</span>
         </span>
         <span className="text-xs font-bold text-[#ef4444] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-          Open Studio <ArrowRight className="w-3 h-3" />
+          Abrir Estúdio <ArrowRight className="w-3 h-3" />
         </span>
       </div>
     </Link>
@@ -1066,15 +1066,15 @@ function CarTable({
         <thead>
           <tr className="border-b border-[#222] bg-[#121212] text-[#777] uppercase text-[10px]">
             <th className="p-3 w-8">Fav</th>
-            <th className="p-3 w-8">Watch</th>
-            <th className="p-3">Class & PI</th>
-            <th className="p-3">Vehicle</th>
-            <th className="p-3">Price (CR)</th>
-            <th className="p-3">Drivetrain</th>
-            <th className="p-3">Power</th>
-            <th className="p-3">Weight</th>
+            <th className="p-3 w-8">Alerta</th>
+            <th className="p-3">Classe & PI</th>
+            <th className="p-3">Veículo</th>
+            <th className="p-3">Preço (CR)</th>
+            <th className="p-3">Tração</th>
+            <th className="p-3">Potência</th>
+            <th className="p-3">Peso</th>
             <th className="p-3">Status</th>
-            <th className="p-3 text-right">Actions</th>
+            <th className="p-3 text-right">Ações</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[#181818]">
@@ -1118,7 +1118,7 @@ function CarTable({
               <td className="p-3 font-bold text-white">{car.power} HP</td>
               <td className="p-3 text-[#aaa]">{car.weight} KG</td>
               <td className="p-3">
-                <span className="text-[#10b981]">{car.status || 'Active'}</span>
+                <span className="text-[#10b981]">{car.status || 'Ativo'}</span>
               </td>
               <td className="p-3 text-right">
                 <div className="flex items-center justify-end gap-2">
@@ -1126,19 +1126,21 @@ function CarTable({
                     to={`/garage/car/${car.id}`}
                     className="px-2 py-1 bg-[#222] hover:bg-[#ef4444] hover:text-black text-white text-[10px] uppercase font-bold"
                   >
-                    Studio
+                    Estúdio
                   </Link>
                   <button
                     onClick={() => onEdit(car)}
                     className="p-1 text-[#666] hover:text-white"
+                    title="Editar Ficha"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => {
-                      if (window.confirm("Delete vehicle?")) onDelete(car.id!);
+                      if (window.confirm("Deseja excluir este veículo da garagem?")) onDelete(car.id!);
                     }}
                     className="p-1 text-[#666] hover:text-[#ef4444]"
+                    title="Excluir"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -1235,18 +1237,18 @@ function CarModal({
           {title}
         </h3>
         <p className="text-xs text-[#777] mb-6">
-          Fill in vehicle specifications, credit value, or auto-fill directly from the franchise database.
+          Preencha a ficha técnica, valor em Créditos (CR) ou utilize o preenchimento automático do catálogo oficial.
         </p>
 
         {/* Catalog Search & Auto-Fill */}
         {!initialData && (
           <div className="mb-6 relative" onClick={(e) => e.stopPropagation()}>
             <label className="block text-[10px] uppercase tracking-widest text-[#ef4444] font-bold mb-1.5 flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3" /> Auto-Fill from Franchise Database ({CAR_CATALOG.length} Cars)
+              <Sparkles className="w-3 h-3" /> Auto-Preenchimento do Catálogo ({CAR_CATALOG.length} Carros)
             </label>
             <input
               type="text"
-              placeholder="Search catalog (e.g. Skyline, Supra, Senna, Jesko, GT3 RS, Demon)..."
+              placeholder="Buscar no catálogo (ex: Skyline, Supra, Senna, Jesko, GT3 RS, Demon)..."
               value={searchQuery}
               onChange={e => {
                 setSearchQuery(e.target.value);
@@ -1282,7 +1284,7 @@ function CarModal({
                   ))
                 ) : (
                   <div className="p-3 text-xs text-[#777] italic">
-                    No matching vehicles found. Enter manually below.
+                    Nenhum veículo correspondente encontrado. Preencha manualmente abaixo.
                   </div>
                 )}
               </div>
@@ -1294,7 +1296,7 @@ function CarModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Brand</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Marca (Brand)</label>
               <input
                 type="text"
                 required
@@ -1304,7 +1306,7 @@ function CarModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Model</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Modelo (Model)</label>
               <input
                 type="text"
                 required
@@ -1317,7 +1319,7 @@ function CarModal({
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Year</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Ano</label>
               <input
                 type="number"
                 required
@@ -1327,7 +1329,7 @@ function CarModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Class</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Classe</label>
               <select
                 value={formData.carClass}
                 onChange={e => setFormData({ ...formData, carClass: e.target.value })}
@@ -1354,7 +1356,7 @@ function CarModal({
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Power (HP)</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Potência (HP)</label>
               <input
                 type="number"
                 required
@@ -1364,7 +1366,7 @@ function CarModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Weight (KG)</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Peso (KG)</label>
               <input
                 type="number"
                 required
@@ -1374,7 +1376,7 @@ function CarModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Drivetrain</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Tração (Drivetrain)</label>
               <select
                 value={formData.drivetrain}
                 onChange={e => setFormData({ ...formData, drivetrain: e.target.value })}
@@ -1390,7 +1392,7 @@ function CarModal({
           {/* Pricing & Rarity Row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#eab308] font-bold mb-1">Value (Credits CR)</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#eab308] font-bold mb-1">Valor (Créditos CR)</label>
               <input
                 type="number"
                 required
@@ -1401,7 +1403,7 @@ function CarModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Rarity / Acquisition</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Raridade / Obtenção</label>
               <select
                 value={formData.rarity}
                 onChange={e => setFormData({ ...formData, rarity: e.target.value })}
@@ -1415,11 +1417,11 @@ function CarModal({
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Engineering Notes / Setup Goals</label>
+            <label className="block text-[10px] uppercase tracking-widest text-[#777] mb-1">Notas de Engenharia / Objetivo da Build</label>
             <textarea
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="e.g. Target S1 900 Road Grip build for high-speed circuits..."
+              placeholder="ex: Build S1 900 Road Grip para circuitos de alta velocidade..."
               rows={2}
               className="w-full bg-[#161616] border border-[#262626] p-2.5 text-xs text-white focus:border-[#ef4444] focus:outline-none"
             />
@@ -1431,14 +1433,14 @@ function CarModal({
               onClick={onClose}
               className="px-4 py-2.5 text-xs text-[#888] hover:text-white uppercase tracking-wider"
             >
-              Cancel
+              Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting}
               className="px-6 py-2.5 bg-[#ef4444] text-black hover:bg-white text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50"
             >
-              {submitting ? 'Saving...' : 'Save Vehicle'}
+              {submitting ? 'Salvando...' : 'Salvar Veículo'}
             </button>
           </div>
         </form>

@@ -68,10 +68,10 @@ export function Cockpit() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-mono font-bold mb-1">
-              Forza Horizon 6 • Engineering Command Center
+              Forza Horizon 6 • Central de Comando de Engenharia
             </div>
             <h1 className="text-3xl sm:text-4xl font-black italic tracking-tighter text-white uppercase">
-              Operational Cockpit
+              Cockpit Operacional
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -80,14 +80,14 @@ export function Cockpit() {
               className="px-4 py-2.5 bg-[#181818] hover:bg-[#252525] border border-[#333] text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2"
             >
               <CarFront className="w-3.5 h-3.5 text-[#ef4444]" />
-              Manage Garage ({cars.length})
+              Gerenciar Garagem ({cars.length})
             </Link>
             <Link 
               to="/engineer" 
               className="px-4 py-2.5 bg-[#ef4444] hover:bg-white hover:text-black text-black text-xs font-mono font-black uppercase tracking-wider transition-colors inline-flex items-center gap-2"
             >
               <Cpu className="w-3.5 h-3.5" />
-              AI Engineer
+              Engenheiro IA
             </Link>
           </div>
         </div>
@@ -99,45 +99,45 @@ export function Cockpit() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 bg-[#0e0e0e] border border-[#222]">
             <div className="flex items-center justify-between text-[#666] mb-3">
-              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Garage Fleet</span>
+              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Frota na Garagem</span>
               <CarFront className="w-4 h-4 text-[#ef4444]" />
             </div>
             <div className="text-3xl font-black text-white font-mono">{cars.length}</div>
             <div className="text-[10px] text-[#666] uppercase tracking-widest mt-1 font-mono">
-              {cars.filter(c => c.isFavorite).length} Favorited • {cars.length > 0 ? `${cars[0].carClass} Top Class` : 'No active cars'}
+              {cars.filter(c => c.isFavorite).length} Favoritos • {cars.length > 0 ? `${cars[0].carClass} Top Class` : 'Sem carros ativos'}
             </div>
           </div>
 
           <div className="p-5 bg-[#0e0e0e] border border-[#222]">
             <div className="flex items-center justify-between text-[#666] mb-3">
-              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Active Tests</span>
+              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Testes Ativos</span>
               <FlaskConical className="w-4 h-4 text-[#3b82f6]" />
             </div>
             <div className="text-3xl font-black text-white font-mono">{pendingTests.length}</div>
             <div className="text-[10px] text-[#666] uppercase tracking-widest mt-1 font-mono">
-              {completedTests.length} Validated / Completed
+              {completedTests.length} Validados / Concluídos
             </div>
           </div>
 
           <div className="p-5 bg-[#0e0e0e] border border-[#222]">
             <div className="flex items-center justify-between text-[#666] mb-3">
-              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Knowledge Logs</span>
+              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Base de Conhecimento</span>
               <Sparkles className="w-4 h-4 text-[#10b981]" />
             </div>
             <div className="text-3xl font-black text-white font-mono">{knowledge.length}</div>
             <div className="text-[10px] text-[#666] uppercase tracking-widest mt-1 font-mono">
-              {knowledge.filter(k => k.confidence === 'High').length} High-confidence discoveries
+              {knowledge.filter(k => k.confidence === 'High').length} Regras de Alta Confiança
             </div>
           </div>
 
           <div className="p-5 bg-[#0e0e0e] border border-[#222]">
             <div className="flex items-center justify-between text-[#666] mb-3">
-              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Telemetry Link</span>
+              <span className="text-[10px] uppercase tracking-widest font-mono font-bold">Link de Telemetria</span>
               <Radio className="w-4 h-4 text-[#eab308]" />
             </div>
             <div className="text-sm font-black text-[#eab308] font-mono uppercase tracking-wider flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#eab308] animate-pulse"></span>
-              Ready (UDP :5300)
+              Pronto (UDP :5300)
             </div>
             <div className="text-[10px] text-[#666] uppercase tracking-widest mt-2 font-mono">
               Data Out / Loopback
@@ -152,11 +152,11 @@ export function Cockpit() {
             <div>
               <div className="flex items-center justify-between mb-4 border-b border-[#1c1c1c] pb-3">
                 <span className="text-[10px] uppercase tracking-widest font-mono font-bold text-[#ef4444] flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-[#ef4444]"></span> Active Development Vehicle
+                  <span className="w-1.5 h-1.5 bg-[#ef4444]"></span> Veículo em Desenvolvimento Ativo
                 </span>
                 {activeCar && (
                   <span className="text-[10px] font-mono text-[#888] uppercase">
-                    Updated recently
+                    Atualizado recentemente
                   </span>
                 )}
               </div>
@@ -177,15 +177,15 @@ export function Cockpit() {
 
                   <div className="grid grid-cols-3 gap-4 my-6 p-4 bg-[#080808] border border-[#1a1a1a]">
                     <div>
-                      <div className="text-[9px] uppercase tracking-widest text-[#555] font-mono">Power</div>
+                      <div className="text-[9px] uppercase tracking-widest text-[#555] font-mono">Potência</div>
                       <div className="text-lg font-black text-white font-mono">{activeCar.power} <span className="text-xs text-[#666] font-normal">HP</span></div>
                     </div>
                     <div>
-                      <div className="text-[9px] uppercase tracking-widest text-[#555] font-mono">Weight</div>
+                      <div className="text-[9px] uppercase tracking-widest text-[#555] font-mono">Peso</div>
                       <div className="text-lg font-black text-white font-mono">{activeCar.weight} <span className="text-xs text-[#666] font-normal">KG</span></div>
                     </div>
                     <div>
-                      <div className="text-[9px] uppercase tracking-widest text-[#555] font-mono">Power-to-Weight</div>
+                      <div className="text-[9px] uppercase tracking-widest text-[#555] font-mono">Relação Peso/Potência</div>
                       <div className="text-lg font-black text-[#10b981] font-mono">
                         {(activeCar.power / (activeCar.weight / 1000)).toFixed(1)} <span className="text-xs text-[#666] font-normal">HP/T</span>
                       </div>
@@ -197,26 +197,26 @@ export function Cockpit() {
                       to={`/garage/car/${activeCar.id}`}
                       className="px-4 py-2 bg-[#ef4444] text-black hover:bg-white text-xs font-bold uppercase tracking-wider font-mono transition-colors inline-flex items-center gap-2"
                     >
-                      Open Car Studio <ArrowRight className="w-3.5 h-3.5" />
+                      Abrir Estúdio do Carro <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                     <Link
-                      to={`/lab?carId=${activeCar.id}`}
+                      to={`/tests?carId=${activeCar.id}`}
                       className="px-4 py-2 bg-[#181818] hover:bg-[#252525] border border-[#333] text-white text-xs font-bold uppercase tracking-wider font-mono transition-colors inline-flex items-center gap-2"
                     >
-                      <FlaskConical className="w-3.5 h-3.5 text-[#3b82f6]" /> Log Experiment
+                      <FlaskConical className="w-3.5 h-3.5 text-[#3b82f6]" /> Registrar Experimento
                     </Link>
                   </div>
                 </div>
               ) : (
                 <div className="py-12 text-center">
                   <div className="text-xs text-[#555] font-mono uppercase tracking-widest mb-4">
-                    NO ACTIVE CARS IN GARAGE
+                    NENHUM CARRO NA GARAGEM
                   </div>
                   <Link 
                     to="/garage"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ef4444] text-black text-xs font-black uppercase tracking-wider hover:bg-white transition-colors"
                   >
-                    <Plus className="w-4 h-4" /> Add Your First Car
+                    <Plus className="w-4 h-4" /> Adicionar Primeiro Carro
                   </Link>
                 </div>
               )}
@@ -228,25 +228,25 @@ export function Cockpit() {
             <div>
               <div className="flex items-center justify-between mb-4 border-b border-[#1c1c1c] pb-3">
                 <span className="text-[10px] uppercase tracking-widest font-mono font-bold text-white flex items-center gap-2">
-                  <Cpu className="w-3.5 h-3.5 text-[#ef4444]" /> AI Race Engineer
+                  <Cpu className="w-3.5 h-3.5 text-[#ef4444]" /> Engenheiro de Pista IA
                 </span>
                 <span className="text-[9px] font-mono text-[#10b981] uppercase font-bold">Online</span>
               </div>
               <p className="text-xs text-[#999] leading-relaxed mb-4">
-                Ask engineering questions, diagnose corner entry understeer, or optimize differential percentages for your active setup.
+                Consulte dúvidas de engenharia, diagnóstico de subesterço/sobresterço e cálculo das porcentagens ideais de diferencial.
               </p>
               <div className="space-y-2">
                 <Link 
                   to="/engineer" 
                   className="block p-2.5 bg-[#141414] hover:bg-[#1c1c1c] border border-[#252525] text-[11px] text-[#ccc] hover:text-white transition-colors font-mono"
                 >
-                  → "Analyze differential setup for high-speed AWD stability"
+                  → "Analisar diferencial AWD para estabilidade em alta velocidade"
                 </Link>
                 <Link 
                   to="/engineer" 
                   className="block p-2.5 bg-[#141414] hover:bg-[#1c1c1c] border border-[#252525] text-[11px] text-[#ccc] hover:text-white transition-colors font-mono"
                 >
-                  → "Calculate optimal tire pressure for lightweight RWD track setup"
+                  → "Calcular pressão ideal de pneus para pista técnica RWD"
                 </Link>
               </div>
             </div>
@@ -254,7 +254,7 @@ export function Cockpit() {
               to="/engineer"
               className="mt-6 w-full py-2.5 border border-[#333] hover:border-[#ef4444] text-[#aaa] hover:text-white text-xs font-mono font-bold uppercase tracking-wider text-center transition-colors block"
             >
-              Open Dedicated AI Console →
+              Abrir Console do Engenheiro IA →
             </Link>
           </div>
         </div>
@@ -265,18 +265,18 @@ export function Cockpit() {
           <div className="bg-[#0e0e0e] border border-[#222] p-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1c1c1c]">
               <h3 className="text-xs uppercase tracking-widest font-mono font-bold text-white flex items-center gap-2">
-                <FlaskConical className="w-3.5 h-3.5 text-[#3b82f6]" /> Recent Test Lab Experiments
+                <FlaskConical className="w-3.5 h-3.5 text-[#3b82f6]" /> Experimentos Recentes do Laboratório
               </h3>
-              <Link to="/lab" className="text-[10px] text-[#ef4444] hover:underline font-mono uppercase font-bold">
-                View All ({tests.length})
+              <Link to="/tests" className="text-[10px] text-[#ef4444] hover:underline font-mono uppercase font-bold">
+                Ver Todos ({tests.length})
               </Link>
             </div>
 
             {tests.length === 0 ? (
               <div className="py-8 text-center border border-dashed border-[#222] bg-[#080808]">
-                <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NO EXPERIMENTS RECORDED YET</p>
-                <Link to="/lab" className="text-xs text-[#ef4444] font-mono uppercase font-bold hover:underline">
-                  + Create Experiment #001
+                <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NENHUM EXPERIMENTO REGISTRADO</p>
+                <Link to="/tests" className="text-xs text-[#ef4444] font-mono uppercase font-bold hover:underline">
+                  + Criar Experimento #001
                 </Link>
               </div>
             ) : (
@@ -303,7 +303,7 @@ export function Cockpit() {
                         ? 'border-[#10b981]/40 text-[#10b981] bg-[#10b981]/10' 
                         : 'border-[#eab308]/40 text-[#eab308] bg-[#eab308]/10'
                     }`}>
-                      {test.status}
+                      {test.status === 'Completed' ? 'Concluído' : test.status === 'Pending' ? 'Pendente' : 'Descartado'}
                     </span>
                   </div>
                 ))}
@@ -315,18 +315,18 @@ export function Cockpit() {
           <div className="bg-[#0e0e0e] border border-[#222] p-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1c1c1c]">
               <h3 className="text-xs uppercase tracking-widest font-mono font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#10b981]" /> Engineering Knowledge Log
+                <Sparkles className="w-3.5 h-3.5 text-[#10b981]" /> Base de Conhecimento de Engenharia
               </h3>
               <Link to="/knowledge" className="text-[10px] text-[#ef4444] hover:underline font-mono uppercase font-bold">
-                View All ({knowledge.length})
+                Ver Todas ({knowledge.length})
               </Link>
             </div>
 
             {knowledge.length === 0 ? (
               <div className="py-8 text-center border border-dashed border-[#222] bg-[#080808]">
-                <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NO KNOWLEDGE ENTRIES SAVED</p>
+                <p className="text-xs text-[#555] font-mono uppercase tracking-widest mb-3">NENHUMA REGRA SALVA</p>
                 <Link to="/knowledge" className="text-xs text-[#10b981] font-mono uppercase font-bold hover:underline">
-                  + Add Confirmed Finding
+                  + Adicionar Descoberta Confirmada
                 </Link>
               </div>
             ) : (
@@ -336,13 +336,13 @@ export function Cockpit() {
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-bold text-white uppercase">{item.subject}</span>
                       <span className="text-[9px] font-mono px-2 py-0.5 border border-[#10b981]/30 text-[#10b981] bg-[#10b981]/10 uppercase font-bold">
-                        {item.confidence} Conf.
+                        {item.confidence === 'High' ? 'Alta Confiança' : item.confidence === 'Medium' ? 'Média' : 'Experimental'}
                       </span>
                     </div>
                     <p className="text-xs text-[#aaa] font-mono leading-relaxed">{item.observation}</p>
                     {item.evidence && (
                       <div className="text-[10px] text-[#666] font-mono mt-2">
-                        Evidence: <span className="text-[#888]">{item.evidence}</span>
+                        Evidência: <span className="text-[#888]">{item.evidence}</span>
                       </div>
                     )}
                   </div>

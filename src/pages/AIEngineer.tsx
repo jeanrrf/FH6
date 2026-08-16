@@ -39,6 +39,7 @@ import {
   TuneData
 } from '../lib/firestore';
 import { TuneCard } from '../components/TuneCard';
+import { useLocation } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'model';
@@ -49,6 +50,7 @@ interface Message {
 
 export function AIEngineer() {
   const { user } = useAuth();
+  const location = useLocation();
   const [cars, setCars] = useState<Car[]>([]);
   const [knowledge, setKnowledge] = useState<KnowledgeEntry[]>([]);
   const [tests, setTests] = useState<TestExperiment[]>([]);
@@ -56,7 +58,7 @@ export function AIEngineer() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'model',
-      text: `### 🏎️ VIRTUAL RACE ENGINEER ACTIVE\n**Chassis & Dynamics Neural Core initialized.**\n\nConnected to Forza Horizon physics matrix. Ask for mechanical tune calculations, differential optimization, ARB load-transfer adjustments, thermal tire balancing, or PI class upgrade blueprints.\n\n*Select a vehicle from your garage above or send live telemetry for immediate diagnosis.*`,
+      text: `### 🏎️ ENGENHEIRO DE PISTA FH6 ATIVO\n**Núcleo de Dinâmica de Chassi e Telemetria Inicializado.**\n\nConectado à matriz física do Forza Horizon 6. Solicite cálculos de setup mecânico, otimização de diferencial (AWD/RWD), calibração de Anti-Roll Bars (ARB), equilíbrio térmico dos pneus ou roteiros de upgrades por classe de PI.\n\n*Selecione um carro da sua Garagem acima ou consulte a telemetria em tempo real.*`,
       timestamp: Date.now()
     }
   ]);
@@ -64,6 +66,7 @@ export function AIEngineer() {
   const [loading, setLoading] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [liveTelemetry, setLiveTelemetry] = useState<any>(null);
+  const [sessionStats, setSessionStats] = useState<any>(null);
   const [telemetryConnected, setTelemetryConnected] = useState(false);
   const [saveKnowledgeSuccess, setSaveKnowledgeSuccess] = useState<string | null>(null);
   
@@ -92,14 +95,28 @@ export function AIEngineer() {
           const data = await res.json();
           setTelemetryConnected(data.connected);
           setLiveTelemetry(data.data);
+          if (data.stats) setSessionStats(data.stats);
         }
       } catch (e) {
         // ignore polling error
       }
-    }, 1500);
+    }, 1200);
 
     return () => clearInterval(interval);
   }, []);
+
+  // Handle telemetry passed from Telemetry page via navigation state
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.telemetryContext) {
+      if (state.telemetryContext.latestFrame) {
+        setLiveTelemetry(state.telemetryContext.latestFrame);
+      }
+      if (state.telemetryContext.sessionStats) {
+        setSessionStats(state.telemetryContext.sessionStats);
+      }
+    }
+  }, [location.state]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -129,6 +146,7 @@ export function AIEngineer() {
       window.speechSynthesis.cancel();
       const clean = text.replace(/```[\s\S]*?```/g, '').replace(/[#*_`]/g, '');
       const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = 'pt-BR';
       utterance.rate = 1.05;
       utterance.pitch = 0.95;
       window.speechSynthesis.speak(utterance);
@@ -166,10 +184,10 @@ export function AIEngineer() {
         activeTune: activeCar ? defaultTuneData(activeCar.drivetrain) : null,
         knowledgeEntries: knowledge.slice(0, 5),
         recentTests: tests.slice(0, 5),
-        liveTelemetry: (includeLiveTelemetry || telemetryConnected) ? liveTelemetry : null
+        liveTelemetry: (includeLiveTelemetry || telemetryConnected) ? liveTelemetry : null,
+        sessionStats: sessionStats
       };
 
-      // Only pass conversation turns from the first user prompt onward
       const filteredTurns = [...messages, userMessage].filter(m => m.text && m.text.trim());
 
       const response = await fetch('/api/ai/chat', {
@@ -186,10 +204,10 @@ export function AIEngineer() {
 
       const data = await response.json().catch(() => ({ text: '' }));
       if (!response.ok && !data.text) {
-        throw new Error(data.error || `HTTP ${response.status}: Failed to reach Race Engineer.`);
+        throw new Error(data.error || `HTTP ${response.status}: Falha de comunicação com o Engenheiro IA.`);
       }
 
-      const replyText = data.text || 'Telemetry analyzed. Dynamics calibrated.';
+      const replyText = data.text || 'Telemetria analisada. Dinâmica de chassi calculada.';
       const extractedTune = parseTuneFromText(replyText);
 
       const newModelMessage: Message = {
@@ -205,7 +223,7 @@ export function AIEngineer() {
       console.error(e);
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: `⚠️ **[CHASSIS TELEMETRY NOTICE]** ${e?.message || 'Chassis telemetry offline. Please retry with a specific vehicle setup query.'}`,
+        text: `⚠️ **[AVISO DE ENGENHARIA]** ${e?.message || 'Falha ao processar solicitação. Verifique os dados do veículo e tente novamente.'}`,
         timestamp: Date.now()
       }]);
     } finally {
@@ -217,14 +235,14 @@ export function AIEngineer() {
     if (!user) return;
     try {
       await addKnowledgeEntry(user.uid, {
-        subject: activeCar ? `${activeCar.brand} ${activeCar.model} - AI Race Setup Rule` : 'Chassis Dynamics Formula',
-        carName: activeCar ? `${activeCar.brand} ${activeCar.model}` : 'General Vehicle',
+        subject: activeCar ? `${activeCar.brand} ${activeCar.model} - Regra de Setup IA` : 'Fórmula de Dinâmica de Chassi',
+        carName: activeCar ? `${activeCar.brand} ${activeCar.model}` : 'Veículo Geral',
         observation: msgText.slice(0, 300) + '...',
-        evidence: `Calculated by FH6 AI Race Engineer Core.`,
+        evidence: `Calculado pelo FH6 AI Engineer Core.`,
         confidence: 'High',
         tags: ['AI-Engineer', activeCar ? activeCar.drivetrain : 'Universal', 'Setup-Guideline']
       });
-      setSaveKnowledgeSuccess(`Saved item #${idx + 1} to Knowledge Base`);
+      setSaveKnowledgeSuccess(`Análise #${idx + 1} salva na Base de Conhecimento com sucesso!`);
       setTimeout(() => setSaveKnowledgeSuccess(null), 3500);
     } catch (err) {
       console.error(err);
@@ -235,7 +253,7 @@ export function AIEngineer() {
     setMessages([
       {
         role: 'model',
-        text: 'Session reset. Telemetry buffer cleared. Ready for setup calculations.',
+        text: 'Sessão reiniciada. Buffer de telemetria limpo. Pronto para novos cálculos de calibração.',
         timestamp: Date.now()
       }
     ]);
@@ -243,35 +261,35 @@ export function AIEngineer() {
 
   const promptCategories = [
     {
-      title: 'Chassis & ARB Balance',
+      title: 'Equilíbrio de Chassi & ARBs',
       prompts: [
-        'Calculate ARB stiffness for neutral balance on corner entry and exit',
-        'Diagnose corner-entry understeer at high speed',
-        'Calculate spring stiffness from weight distribution and curb weight'
+        'Calcular rigidez de Anti-Roll Bars (ARB) para equilíbrio neutro na entrada e saída de curva',
+        'Diagnosticar e eliminar o subesterço (understeer) na entrada de curvas rápidas',
+        'Calcular rigidez de molas (Springs) a partir da distribuição de peso e massa'
       ]
     },
     {
-      title: 'Differential & Drivetrain',
+      title: 'Diferencial & Transmissão',
       prompts: [
-        'Differential setup for RWD high horsepower to prevent snap oversteer',
-        'Optimize AWD center differential torque split for tarmac grip',
-        'Front vs Rear differential decel lock for trail braking'
+        'Calibrar diferencial RWD de alta potência para evitar snap oversteer na reaceleração',
+        'Otimizar divisão central de torque do diferencial AWD para aderência em asfalto',
+        'Ajustar bloqueio de Decel no diferencial traseiro para estabilizar a frenagem'
       ]
     },
     {
-      title: 'Thermal & Pressures',
+      title: 'Térmica & Pressão de Pneus',
       prompts: [
-        'Calculate cold tire pressures to reach optimal 33.0 PSI hot',
-        'Analyze camber settings based on tire inside vs outside temperature',
-        'Damping bump/rebound ratio for curbs and elevation changes'
+        'Calcular pressão a frio dos pneus para atingir 33.0 PSI a quente em pista',
+        'Analisar camber dianteiro/traseiro para gradiente térmico ideal',
+        'Proporção entre Rebound e Bump Damping para zebras e variações de relevo'
       ]
     },
     {
-      title: 'Builds & PI Class',
+      title: 'Builds & Roteiros de PI',
       prompts: [
-        'Suggest priority upgrades to reach PI 800 (A-Class) with highest grip',
-        'Optimize upgrade path for PI 900 (S1-Class) circuit racer',
-        'Calculate 6-speed transmission gear ratios and final drive'
+        'Indicar upgrades prioritários para atingir PI 800 (Classe A) com máxima aderência',
+        'Otimizar build de circuito fechado para PI 900 (Classe S1)',
+        'Calcular escalonamento de marchas e Final Drive para atingir potência máxima na reta'
       ]
     }
   ];
@@ -284,10 +302,10 @@ export function AIEngineer() {
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-bold mb-1 flex items-center gap-2">
               <span className="w-2 h-2 bg-[#ef4444] rounded-full animate-pulse"></span>
-              Neural Vehicle Dynamics & Race Engineering Core
+              Núcleo Neural de Dinâmica Veicular & Engenharia de Performance
             </div>
             <h1 className="text-2xl sm:text-3xl font-black italic tracking-tighter text-white uppercase flex items-center gap-3">
-              AI Race Engineer
+              Engenheiro IA (FH6)
               <span className="text-xs font-mono font-normal not-italic px-2 py-0.5 bg-[#181818] border border-[#333] text-[#10b981]">
                 Gemini 3.7 Flash
               </span>
@@ -301,7 +319,7 @@ export function AIEngineer() {
               {telemetryConnected ? (
                 <>
                   <Wifi className="w-3.5 h-3.5 text-[#10b981] animate-pulse" />
-                  <span className="text-[#10b981] font-bold uppercase text-[10px]">UDP Telemetry Live</span>
+                  <span className="text-[#10b981] font-bold uppercase text-[10px]">Telemetria UDP Ao Vivo</span>
                   {liveTelemetry && (
                     <span className="text-[10px] text-[#888]">
                       ({Math.round(liveTelemetry.speedKmh || 0)} km/h • {Math.round(liveTelemetry.rpm || 0)} RPM)
@@ -311,20 +329,20 @@ export function AIEngineer() {
               ) : (
                 <>
                   <WifiOff className="w-3.5 h-3.5 text-[#666]" />
-                  <span className="text-[#666] font-bold uppercase text-[10px]">Telemetry Idle</span>
+                  <span className="text-[#666] font-bold uppercase text-[10px]">Telemetria Offline</span>
                 </>
               )}
             </div>
 
             {/* Vehicle Context Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-[#666] uppercase">Vehicle:</span>
+              <span className="text-[10px] text-[#666] uppercase">Veículo Ativo:</span>
               <select
                 value={selectedCarId}
                 onChange={e => setSelectedCarId(e.target.value)}
                 className="bg-[#141414] border border-[#333] text-xs text-white px-3 py-1.5 uppercase font-bold focus:border-[#ef4444] focus:outline-none"
               >
-                <option value="GLOBAL">Global / All Vehicles</option>
+                <option value="GLOBAL">Geral / Sem Veículo Específico</option>
                 {cars.map(c => (
                   <option key={c.id} value={c.id}>
                     {c.brand} {c.model} ({c.carClass}{c.pi} • {c.drivetrain})
@@ -341,17 +359,17 @@ export function AIEngineer() {
                   ? 'bg-[#ef4444] text-black border-[#ef4444] font-bold' 
                   : 'bg-[#141414] hover:bg-[#222] border-[#333] text-[#777] hover:text-white'
               }`}
-              title={voiceEnabled ? 'Pit Wall Voice Readout Enabled' : 'Enable Pit Wall Voice Audio'}
+              title={voiceEnabled ? 'Áudio de Rádio dos Boxes Ativo' : 'Ativar Leitura por Voz dos Boxes'}
             >
               {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              <span className="text-[10px] uppercase">{voiceEnabled ? 'Voice ON' : 'Voice'}</span>
+              <span className="text-[10px] uppercase">{voiceEnabled ? 'Voz LIGADA' : 'Voz'}</span>
             </button>
 
             {/* Reset Chat */}
             <button
               onClick={handleClearHistory}
               className="p-2 bg-[#141414] hover:bg-[#222] border border-[#333] text-[#777] hover:text-white"
-              title="Reset Chat Session"
+              title="Reiniciar Sessão de Chat"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -369,7 +387,7 @@ export function AIEngineer() {
         </div>
       )}
 
-      {/* Main Workspace Layout (Chat + Telemetry Diagnostics Sidebar) */}
+      {/* Main Workspace Layout */}
       <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-6 p-4 sm:p-6 overflow-hidden">
         
         {/* Left Side: Main Chat Terminal */}
@@ -379,19 +397,19 @@ export function AIEngineer() {
           <div className="p-3 bg-[#080808] border-b border-[#1f1f1f] flex flex-wrap items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2">
               <Bot className="w-4 h-4 text-[#ef4444]" />
-              <span className="text-[#888]">Vehicle Telemetry Target:</span>
+              <span className="text-[#888]">Alvo de Engenharia:</span>
               <span className="font-bold text-white uppercase">
                 {activeCar 
                   ? `${activeCar.brand} ${activeCar.model} (${activeCar.carClass}${activeCar.pi} • ${activeCar.power} HP • ${activeCar.weight} kg • ${activeCar.drivetrain})` 
-                  : 'Universal Horizon Physics Model'}
+                  : 'Física Universal do Forza Horizon 6'}
               </span>
             </div>
             <div className="flex items-center gap-3 text-[10px]">
               <span className="text-[#10b981] font-bold uppercase">
-                {knowledge.length} Knowledge Rules
+                {knowledge.length} Regras Salvas
               </span>
               <span className="text-[#3b82f6] font-bold uppercase">
-                {tests.length} Test Runs
+                {tests.length} Experimentos
               </span>
             </div>
           </div>
@@ -422,8 +440,7 @@ export function AIEngineer() {
                           ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2 text-[#ddd]">{children}</ol>,
                           li: ({ children }) => <li className="text-[#ccc]">{children}</li>,
                           code: ({ inline, className, children, ...props }: any) => {
-                            const match = /language-(\w+)/.exec(className || '');
-                            if (String(children).includes('json:tune')) return null; // handled via TuneCard below
+                            if (String(children).includes('json:tune')) return null;
                             return !inline ? (
                               <pre className="p-3 bg-[#0a0a0a] border border-[#222] text-[#f59e0b] overflow-x-auto my-2 text-[11px]">
                                 <code>{children}</code>
@@ -452,7 +469,7 @@ export function AIEngineer() {
                           tune={m.extractedTune}
                           carId={activeCar?.id}
                           carName={activeCar ? `${activeCar.brand} ${activeCar.model}` : undefined}
-                          title="AI Calculated Setup Sheet"
+                          title="Setup Calculado pelo Engenheiro IA"
                         />
                       )}
                     </div>
@@ -467,9 +484,9 @@ export function AIEngineer() {
                         navigator.clipboard.writeText(m.text);
                       }}
                       className="hover:text-white flex items-center gap-1"
-                      title="Copy response"
+                      title="Copiar texto da resposta"
                     >
-                      <Copy className="w-3 h-3" /> Copy
+                      <Copy className="w-3 h-3" /> Copiar
                     </button>
 
                     <span>•</span>
@@ -477,9 +494,9 @@ export function AIEngineer() {
                     <button
                       onClick={() => handleSaveToKnowledge(m.text, idx)}
                       className="hover:text-[#10b981] flex items-center gap-1"
-                      title="Save this analysis as a rule in Knowledge Base"
+                      title="Salvar esta análise como regra na Base de Conhecimento"
                     >
-                      <BookOpen className="w-3 h-3" /> Save to Knowledge
+                      <BookOpen className="w-3 h-3" /> Salvar no Conhecimento
                     </button>
                   </div>
                 )}
@@ -490,7 +507,7 @@ export function AIEngineer() {
               <div className="flex items-center gap-3 text-xs text-[#aaa] p-4 bg-[#141414] border-l-2 border-[#ef4444] w-fit">
                 <Loader2 className="w-4 h-4 animate-spin text-[#ef4444]" />
                 <span className="uppercase tracking-wider">
-                  Analyzing load transfer vectors & solving suspension dynamics equations...
+                  Processando vetores de transferência de carga e resolvendo dinâmica de suspensão...
                 </span>
               </div>
             )}
@@ -500,11 +517,11 @@ export function AIEngineer() {
           {/* Quick Prompt Strip */}
           <div className="p-2.5 bg-[#0a0a0a] border-t border-[#1a1a1a] flex gap-2 overflow-x-auto scrollbar-none">
             {[
-              { label: 'Understeer Entry Fix', prompt: 'Diagnose and fix high-speed corner entry understeer with ARBs and damping' },
-              { label: 'AWD Diff Split', prompt: 'Calculate optimal AWD differential acceleration/deceleration lock and center power split' },
-              { label: 'Cold PSI Calculator', prompt: 'Calculate optimal cold tire pressures for target 33.0 PSI hot track conditions' },
-              { label: 'PI 800 Upgrade Blueprint', prompt: 'Provide step-by-step upgrade parts roadmap to build the highest-grip A800 circuit racer' },
-              { label: 'ARB Stiffness Formula', prompt: 'Calculate exact front and rear Anti-Roll Bar values from weight distribution' },
+              { label: 'Corrigir Understeer', prompt: 'Diagnosticar e corrigir subesterço (understeer) na entrada de curva via ARB e amortecedores' },
+              { label: 'Diferencial AWD Ideal', prompt: 'Calcular distribuição de torque e aceleração/desaceleração ideal do diferencial AWD' },
+              { label: 'Pressão a Frio', prompt: 'Calcular pressões a frio dos pneus para atingir 33.0 PSI a quente em pista' },
+              { label: 'Blueprint Classe A800', prompt: 'Fornecer roteiro passo a passo de peças de upgrade para atingir o topo da classe A800 com máxima aderência' },
+              { label: 'Rigidez de ARBs', prompt: 'Calcular valores exatos de Anti-Roll Bars dianteira e traseira a partir da distribuição de peso' },
             ].map((item, i) => (
               <button
                 key={i}
@@ -528,7 +545,7 @@ export function AIEngineer() {
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Ask Race Engineer for exact setup numbers, PI builds, ARBs, spring rates, or diff percentages..."
+              placeholder="Peça números de tuning, peças de upgrade, ARBs, molas, amortecedores ou porcentagens de diferencial..."
               className="flex-1 bg-[#141414] border border-[#262626] p-3 text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#ef4444]"
             />
             <button
@@ -536,7 +553,7 @@ export function AIEngineer() {
               disabled={loading || !input.trim()}
               className="px-6 bg-[#ef4444] text-black hover:bg-white text-xs font-black uppercase transition-colors disabled:opacity-50 inline-flex items-center gap-2 shrink-0"
             >
-              <Send className="w-3.5 h-3.5" /> Analyze
+              <Send className="w-3.5 h-3.5" /> Analisar
             </button>
           </form>
         </div>
@@ -544,35 +561,35 @@ export function AIEngineer() {
         {/* Right Side: Engineering Diagnostics & Live Telemetry Inspector */}
         <div className="w-full lg:w-80 bg-[#0e0e0e] border border-[#222] flex flex-col shrink-0 overflow-y-auto">
           <div className="p-4 border-b border-[#222] bg-[#121212]">
-            <div className="text-[10px] uppercase tracking-widest text-[#ef4444] font-bold">Chassis Diagnostics</div>
-            <div className="text-sm font-black italic text-white uppercase">Live Telemetry Feed</div>
+            <div className="text-[10px] uppercase tracking-widest text-[#ef4444] font-bold">Diagnóstico de Chassi</div>
+            <div className="text-sm font-black italic text-white uppercase">Feed de Telemetria Real</div>
           </div>
 
           {/* Telemetry Snapshot Card */}
           <div className="p-4 border-b border-[#1c1c1c] space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#666] uppercase text-[10px]">UDP Feed:</span>
+              <span className="text-[#666] uppercase text-[10px]">Fluxo UDP:</span>
               <span className={`text-[10px] font-bold uppercase ${telemetryConnected ? 'text-[#10b981]' : 'text-[#777]'}`}>
-                {telemetryConnected ? 'Live Connection' : 'Standing By'}
+                {telemetryConnected ? 'Online (Ativo)' : 'Aguardando Jogo'}
               </span>
             </div>
 
             {liveTelemetry ? (
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between p-2 bg-[#141414] border border-[#222]">
-                  <span className="text-[#888]">Speed:</span>
+                  <span className="text-[#888]">Velocidade:</span>
                   <span className="text-white font-bold">{Math.round(liveTelemetry.speedKmh || 0)} km/h</span>
                 </div>
                 <div className="flex justify-between p-2 bg-[#141414] border border-[#222]">
-                  <span className="text-[#888]">Lateral G:</span>
+                  <span className="text-[#888]">Aceleração Lat:</span>
                   <span className="text-[#ef4444] font-bold">{Number(liveTelemetry.accelX || 0).toFixed(2)} G</span>
                 </div>
                 <div className="flex justify-between p-2 bg-[#141414] border border-[#222]">
-                  <span className="text-[#888]">Longitudinal G:</span>
-                  <span className="text-[#3b82f6] font-bold">{Number(liveTelemetry.accelY || 0).toFixed(2)} G</span>
+                  <span className="text-[#888]">Aceleração Long:</span>
+                  <span className="text-[#3b82f6] font-bold">{Number(liveTelemetry.accelZ || 0).toFixed(2)} G</span>
                 </div>
                 <div className="flex justify-between p-2 bg-[#141414] border border-[#222]">
-                  <span className="text-[#888]">Tire Slip (FL / FR):</span>
+                  <span className="text-[#888]">Slip Dianteiro (FL/FR):</span>
                   <span className="text-white font-bold">
                     {Number(liveTelemetry.tireSlipFL || 0).toFixed(2)} / {Number(liveTelemetry.tireSlipFR || 0).toFixed(2)}
                   </span>
@@ -581,25 +598,25 @@ export function AIEngineer() {
             ) : (
               <div className="p-4 bg-[#141414] border border-[#222] text-center text-[#666] text-xs">
                 <Activity className="w-6 h-6 mx-auto mb-2 opacity-50" />
-                No active UDP stream received. Start Forza or use the Telemetry simulator to send live packets.
+                Nenhum fluxo UDP detectado no momento. Abra o Forza Horizon 6 com Data Out ligado na porta 5300.
               </div>
             )}
 
             {/* Quick Button to inject live telemetry */}
             <button
-              onClick={() => sendMessage('Analyze the current live telemetry packet, friction circle G-forces, and tire slip rates to diagnose handling limits.', true)}
+              onClick={() => sendMessage('Analise o pacote de telemetria real atual, círculo de aderência G-G e taxas de slip dos pneus para diagnosticar limites dinâmicos.', true)}
               disabled={loading}
               className="w-full py-2 bg-[#181818] hover:bg-[#252525] border border-[#333] text-[10px] text-white uppercase font-bold transition-colors flex items-center justify-center gap-1.5"
             >
               <Zap className="w-3.5 h-3.5 text-[#ef4444]" />
-              Audit Live Telemetry
+              Auditar Telemetria Atual
             </button>
           </div>
 
           {/* Quick Engineering Question Library */}
           <div className="p-4 flex-1 space-y-4">
             <div className="text-[10px] uppercase tracking-widest text-[#888] font-bold">
-              Engineering Domain Library
+              Biblioteca de Questões Rápidas
             </div>
 
             {promptCategories.map((cat, catIdx) => (

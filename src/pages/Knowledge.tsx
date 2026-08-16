@@ -37,7 +37,7 @@ export function Knowledge() {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    if (window.confirm("Delete this engineering rule?")) {
+    if (window.confirm("Deseja excluir esta regra de engenharia?")) {
       await deleteKnowledgeEntry(user.uid, id);
     }
   };
@@ -48,28 +48,28 @@ export function Knowledge() {
       setLoading(true);
       const defaults = [
         {
-          subject: 'Aero Balance in High-Speed Sweep',
-          carName: 'General Physics / GT3 / S2 Class',
-          observation: 'Increasing rear wing angle by 10-15% stabilizes turn-in at >200 KM/H, but shifts mid-corner balance to understeer unless front ARB is softened proportionally.',
-          evidence: 'Tested on Horizon Mexico Circuit high-speed sector 2.',
+          subject: 'Equilíbrio Aerodinâmico em Curvas Rápidas',
+          carName: 'Física Geral / GT3 / Classe S2',
+          observation: 'Aumentar a asa traseira em 10-15% estabiliza a entrada em curvas acima de 200 KM/H, mas desloca o balanço para subesterço a menos que a barra estabilizadora (ARB) dianteira seja proporcionalmente amolecida.',
+          evidence: 'Testado no setor 2 de alta velocidade do Circuito Horizon México.',
           confidence: 'High' as const,
-          tags: ['Aero', 'ARBs', 'S2 Class']
+          tags: ['Aero', 'ARBs', 'Classe S2']
         },
         {
-          subject: 'Off-Throttle Turn-In Rotation (Decel Lock)',
-          carName: 'RWD / AWD Platforms',
-          observation: 'Setting rear differential deceleration below 15-20% causes snap oversteer during trail braking into hairpins. 30-38% decel maintains rear axle stability.',
-          evidence: 'Empirical telemetry tests #002 and #004.',
+          subject: 'Rotação na Entrada sem Acelerador (Decel Lock)',
+          carName: 'Plataformas RWD / AWD',
+          observation: 'Configurar a desaceleração do diferencial traseiro abaixo de 15-20% gera sobresterço repentino durante o trail braking. 30-38% mantém estabilidade no eixo traseiro.',
+          evidence: 'Testes empíricos de telemetria #002 e #004.',
           confidence: 'High' as const,
-          tags: ['Differential', 'Braking', 'RWD']
+          tags: ['Diferencial', 'Frenagem', 'RWD']
         },
         {
-          subject: 'Tire Pressure Sweet Spot for Thermal Grip',
-          carName: 'Slick / Semi-Slick Compounds',
-          observation: 'Starting cold tire pressure at 27.5-28.5 PSI stabilizes hot running pressure at 32.0-33.0 PSI after 2 warm-up laps, maximizing contact patch traction.',
-          evidence: 'Telemetry thermal logbook.',
+          subject: 'Ponto Ideal de Pressão de Pneus para Aderência Térmica',
+          carName: 'Compostos Slick / Semi-Slick',
+          observation: 'Iniciar a pressão a frio em 27.5-28.5 PSI estabiliza a pressão a quente em 32.0-33.0 PSI após 2 voltas de aquecimento, maximizando a área de contato dos pneus.',
+          evidence: 'Caderno térmico de telemetria.',
           confidence: 'High' as const,
-          tags: ['Tires', 'Telemetry']
+          tags: ['Pneus', 'Telemetria']
         }
       ];
 
@@ -99,17 +99,17 @@ export function Knowledge() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#eab308] font-bold mb-1">
-              Engineering Discoveries & Principles
+              Descobertas & Princípios de Engenharia
             </div>
             <h1 className="text-3xl sm:text-4xl font-black italic tracking-tighter text-white uppercase">
-              Knowledge Base
+              Base de Conhecimento
             </h1>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-5 py-2.5 bg-[#eab308] text-black hover:bg-white text-xs font-black uppercase tracking-wider transition-colors inline-flex items-center gap-2"
           >
-            <Plus className="w-4 h-4" /> Add Knowledge Entry
+            <Plus className="w-4 h-4" /> Adicionar Regra
           </button>
         </div>
       </header>
@@ -122,7 +122,7 @@ export function Knowledge() {
             <Search className="w-4 h-4 text-[#555] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search engineering rules, observations, tags..."
+              placeholder="Buscar regras, observações, tags..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full bg-[#141414] border border-[#262626] pl-9 pr-4 py-2 text-xs text-white placeholder-[#555] focus:outline-none focus:border-[#eab308]"
@@ -130,7 +130,7 @@ export function Knowledge() {
           </div>
 
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-[#555] uppercase mr-1">Confidence:</span>
+            <span className="text-[10px] text-[#555] uppercase mr-1">Confiança:</span>
             {(['ALL', 'High', 'Medium', 'Experimental'] as const).map(conf => (
               <button
                 key={conf}
@@ -141,7 +141,7 @@ export function Knowledge() {
                     : 'bg-[#141414] text-[#888] hover:text-white border border-[#222]'
                 }`}
               >
-                {conf}
+                {conf === 'ALL' ? 'TODAS' : conf === 'High' ? 'ALTA' : conf === 'Medium' ? 'MÉDIA' : 'EXPERIMENTAL'}
               </button>
             ))}
           </div>
@@ -156,30 +156,30 @@ export function Knowledge() {
           <div className="text-center py-20 border border-dashed border-[#222] bg-[#0c0c0c] p-8">
             <BookOpen className="w-12 h-12 text-[#444] mx-auto mb-4" />
             <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">
-              Knowledge Base is Empty
+              Base de Conhecimento Vazia
             </h3>
             <p className="text-xs text-[#666] max-w-md mx-auto mb-6">
-              Record verified tuning relationships, empirical rules, and track physics to continuously enhance your tuning system.
+              Registre correlações de tuning comprovadas, regras empíricas e comportamento de física de pista para aprimorar continuamente o sistema.
             </p>
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowAddModal(true)}
                 className="px-5 py-2.5 bg-[#eab308] text-black text-xs font-black uppercase tracking-wider hover:bg-white transition-colors"
               >
-                + Add First Rule
+                + Adicionar Primeira Regra
               </button>
               <button
                 onClick={handleSeedDefaults}
                 className="px-5 py-2.5 bg-[#181818] border border-[#333] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#252525] transition-colors"
               >
-                Import Baseline Rules
+                Importar Regras Padrão
               </button>
             </div>
           </div>
         ) : filteredEntries.length === 0 ? (
           <div className="text-center py-16 border border-[#222] bg-[#0c0c0c]">
             <p className="text-xs text-[#666] uppercase tracking-widest">
-              No knowledge entries matching filter
+              Nenhuma entrada corresponde ao filtro de busca
             </p>
           </div>
         ) : (
@@ -199,11 +199,12 @@ export function Knowledge() {
                           ? 'text-[#eab308] border-[#eab308]/30 bg-[#eab308]/10'
                           : 'text-[#888] border-[#333] bg-[#141414]'
                       }`}>
-                        {entry.confidence}
+                        {entry.confidence === 'High' ? 'Alta' : entry.confidence === 'Medium' ? 'Média' : 'Experimental'}
                       </span>
                       <button
                         onClick={() => handleDelete(entry.id!)}
                         className="p-1 text-[#555] hover:text-[#ef4444]"
+                        title="Excluir Regra"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -212,7 +213,7 @@ export function Knowledge() {
 
                   {entry.carName && (
                     <div className="text-[10px] text-[#eab308] font-bold uppercase mb-3">
-                      Applicability: {entry.carName}
+                      Aplicabilidade: {entry.carName}
                     </div>
                   )}
 
@@ -222,7 +223,7 @@ export function Knowledge() {
 
                   {entry.evidence && (
                     <div className="p-3 bg-[#080808] border border-[#1a1a1a] text-[11px] text-[#888] mb-4">
-                      <span className="text-[#aaa] font-bold block mb-0.5">Empirical Evidence:</span>
+                      <span className="text-[#aaa] font-bold block mb-0.5">Evidência Empírica:</span>
                       {entry.evidence}
                     </div>
                   )}
@@ -265,7 +266,7 @@ function CreateKnowledgeModal({
   onSubmit: (data: Omit<KnowledgeEntry, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
 }) {
   const [subject, setSubject] = useState('');
-  const [carName, setCarName] = useState('All AWD / RWD Cars');
+  const [carName, setCarName] = useState('Todos Carros AWD / RWD');
   const [observation, setObservation] = useState('');
   const [evidence, setEvidence] = useState('');
   const [confidence, setConfidence] = useState<'High' | 'Medium' | 'Experimental'>('High');
@@ -299,19 +300,19 @@ function CreateKnowledgeModal({
         </button>
 
         <h3 className="text-xl font-black italic text-white uppercase mb-2">
-          New Knowledge Base Discovery
+          Nova Descoberta de Engenharia
         </h3>
         <p className="text-xs text-[#666] mb-6">
-          Document an empirical tuning rule or vehicle setup insight.
+          Documente uma regra empírica de tuning ou insight mecânico da física do veículo.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] uppercase text-[#777] mb-1">Subject / Phenomenon</label>
+            <label className="block text-[10px] uppercase text-[#777] mb-1">Assunto / Fenômeno</label>
             <input
               type="text"
               required
-              placeholder="e.g. Front Roll Bar Stiffness vs Mid-Corner Push"
+              placeholder="ex: Rigidez da Barra Dianteira vs Subesterço em Curva"
               value={subject}
               onChange={e => setSubject(e.target.value)}
               className="w-full bg-[#161616] border border-[#262626] p-2.5 text-white focus:border-[#eab308] focus:outline-none"
@@ -320,35 +321,35 @@ function CreateKnowledgeModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] uppercase text-[#777] mb-1">Applicability / Platform</label>
+              <label className="block text-[10px] uppercase text-[#777] mb-1">Aplicabilidade / Plataforma</label>
               <input
                 type="text"
-                placeholder="e.g. All S1 Road Grip Cars, RWD High Downforce"
+                placeholder="ex: Todos os carros S1 Road Grip, RWD Alto Downforce"
                 value={carName}
                 onChange={e => setCarName(e.target.value)}
                 className="w-full bg-[#161616] border border-[#262626] p-2 text-white focus:border-[#eab308] focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase text-[#777] mb-1">Confidence Rating</label>
+              <label className="block text-[10px] uppercase text-[#777] mb-1">Nível de Confiança</label>
               <select
                 value={confidence}
                 onChange={e => setConfidence(e.target.value as any)}
                 className="w-full bg-[#161616] border border-[#262626] p-2 text-white focus:border-[#eab308] focus:outline-none"
               >
-                <option value="High">High (Empirically Verified)</option>
-                <option value="Medium">Medium (Consistent Trend)</option>
-                <option value="Experimental">Experimental (Hypothesis)</option>
+                <option value="High">Alta (Comprovada Empiricamente)</option>
+                <option value="Medium">Média (Tendência Consistente)</option>
+                <option value="Experimental">Experimental (Hipótese em Teste)</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase text-[#777] mb-1">Engineering Observation / Rule</label>
+            <label className="block text-[10px] uppercase text-[#777] mb-1">Observação de Engenharia / Regra</label>
             <textarea
               required
               rows={3}
-              placeholder="Describe the cause-and-effect relationship in clear mathematical/mechanical detail..."
+              placeholder="Descreva a relação de causa e efeito com detalhes mecânicos e físicos claros..."
               value={observation}
               onChange={e => setObservation(e.target.value)}
               className="w-full bg-[#161616] border border-[#262626] p-2.5 text-white focus:border-[#eab308] focus:outline-none"
@@ -356,10 +357,10 @@ function CreateKnowledgeModal({
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase text-[#777] mb-1">Evidence / Supporting Telemetry</label>
+            <label className="block text-[10px] uppercase text-[#777] mb-1">Evidência / Telemetria de Suporte</label>
             <input
               type="text"
-              placeholder="e.g. Validated across 15 laps at Horizon Mexico Circuit with 60Hz UDP telemetry."
+              placeholder="ex: Validado em 15 voltas no Circuito Horizon México com telemetria UDP a 60Hz."
               value={evidence}
               onChange={e => setEvidence(e.target.value)}
               className="w-full bg-[#161616] border border-[#262626] p-2 text-white focus:border-[#eab308] focus:outline-none"
@@ -367,10 +368,10 @@ function CreateKnowledgeModal({
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase text-[#777] mb-1">Tags (Comma-Separated)</label>
+            <label className="block text-[10px] uppercase text-[#777] mb-1">Tags (Separadas por vírgula)</label>
             <input
               type="text"
-              placeholder="e.g. Aero, ARBs, Suspension, S1"
+              placeholder="ex: Aero, ARBs, Suspensão, S1"
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               className="w-full bg-[#161616] border border-[#262626] p-2 text-white focus:border-[#eab308] focus:outline-none"
@@ -378,13 +379,13 @@ function CreateKnowledgeModal({
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-[#222]">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-[#777] hover:text-white uppercase">Cancel</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 text-[#777] hover:text-white uppercase">Cancelar</button>
             <button
               type="submit"
               disabled={submitting}
               className="px-6 py-2 bg-[#eab308] text-black font-bold uppercase hover:bg-white transition-colors disabled:opacity-50"
             >
-              {submitting ? 'Saving...' : 'Save Knowledge'}
+              {submitting ? 'Salvando...' : 'Salvar Regra'}
             </button>
           </div>
         </form>
